@@ -1,0 +1,1529 @@
+/* ============================================================================
+ * dictionary.css —— 详情面板与词典释义的全部排版
+ *
+ * 设计目标：一页排印精良的纸质辞典内页。
+ *   · 正文衬线，日文用 --font-serif-ja
+ *   · 圆角极小，靠细直线与留白分区
+ *   · 义项编号悬挂在左页边，例句缩进并带细竖线
+ *   · 全部尺寸按 ~440px 的窄侧栏调过，任何内容都不许横向溢出
+ *
+ * 只使用 styles.css 里定义的 CSS 变量，不在这里定义主题色。
+ * ==========================================================================*/
+
+/* ══════════════════════════ 1. 面板内容区 ═════════════════════════ */
+
+/* 面板骨架（.detail / .detail-nav / .detail-body）由 styles.css 负责，
+   这里只管面板里的内容排版。为了不与它重叠，全部选择器都限定在 .detail 内。 */
+
+.detail .empty .empty-hint {
+  font-size: 12px;
+}
+
+.detail .detail-banner {
+  margin: 12px;
+}
+
+/* ═══════════════════════════ 2. 词头 ═══════════════════════════ */
+
+/* 词头的字号与双线由 styles.css 给定，这里只补窄栏需要的换行与日文字体 */
+.detail .wordhead .surface {
+  word-break: break-word;
+}
+
+.detail .wordhead .sub .jp {
+  font-family: var(--font-serif-ja);
+}
+
+.detail .wordhead-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* ═══════════════════════════ 3. 分区标题 ═══════════════════════════ */
+
+/* 分区内边距由 styles.css 给定，这里只去掉最后一条分隔线 */
+.detail .section:last-child {
+  border-bottom: 0;
+}
+
+.detail .sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 3px double var(--line-strong);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.detail .sec-head .sec-label {
+  color: var(--fg-muted);
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  text-transform: uppercase;
+}
+
+.detail .sec-head .count {
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+}
+
+/* ═══════════════════════════ 4. 通用小件 ═══════════════════════════ */
+
+.detail .kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.detail .kv dt {
+  color: var(--fg-faint);
+  font-size: 12px;
+}
+
+.detail .kv dd {
+  margin: 0;
+  color: var(--fg-strong);
+}
+
+.detail .taglist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.detail .taglist.gap-t {
+  margin-top: 6px;
+}
+
+.detail .tag {
+  padding: 1px 5px;
+  border: 1px solid var(--tc, var(--line));
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--tc, var(--fg-muted));
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Yomitan 标签分类色（标签只在详情面板里出现） */
+.detail .tag-cat-name,
+.detail .tag-cat-dictionary { --tc: var(--pos-propernoun); }
+.detail .tag-cat-expression { --tc: var(--pos-adverb); }
+.detail .tag-cat-partOfSpeech { --tc: var(--pos-verb); }
+.detail .tag-cat-frequency,
+.detail .tag-cat-popular,
+.detail .tag-cat-frequent { --tc: var(--accent-2); }
+.detail .tag-cat-archaism,
+.detail .tag-cat-dialect { --tc: var(--warn); }
+.detail .tag-cat-pronunciation-dictionary { --tc: var(--pos-auxiliary); }
+.detail .tag-cat-searchRank { --tc: var(--pos-i-adjective); }
+
+.detail .chiptag {
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.detail .steps {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+}
+
+.detail .steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 0;
+  font-family: var(--font-serif-ja);
+  color: var(--fg-strong);
+}
+
+.detail .steps .arrow {
+  width: 1em;
+  color: var(--fg-faint);
+  font-size: 11px;
+}
+
+.detail .note {
+  margin: 8px 0 0;
+  padding-left: 9px;
+  border-left: 1px solid var(--line-strong);
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  line-height: 1.85;
+}
+
+.detail .note .note-label {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  vertical-align: 1px;
+}
+
+.detail .table-wrap {
+  overflow-x: auto;
+  margin: 0 -2px;
+}
+
+.detail .subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.detail .subtable th {
+  padding: 3px 6px 5px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.detail .subtable td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--fg);
+  vertical-align: top;
+}
+
+.detail .subtable tr:last-child td {
+  border-bottom: 0;
+}
+
+.detail .subtable .jp {
+  font-family: var(--font-serif-ja);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.detail .subtable .role {
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.detail .subtable .sub-line {
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════ 5. 助词详解 ═══════════════════════════ */
+
+.detail .args {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.detail .arg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur);
+}
+
+.detail .arg-card:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.detail .arg-card:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.detail .arg-card.empty {
+  cursor: default;
+}
+
+.detail .arg-card .arole {
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+.detail .arg-card .asurface {
+  overflow: hidden;
+  font-family: var(--font-serif-ja);
+  font-size: 15px;
+  color: var(--fg-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail .arg-mid {
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: var(--surface-2);
+  font-family: var(--font-serif-ja);
+  font-size: 17px;
+  color: var(--pos-particle);
+}
+
+.detail .sense-card {
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+}
+
+.detail .sense-card + .sense-card {
+  margin-top: 6px;
+}
+
+.detail .sense-card.current {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.detail .sense-card .slabel {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--fg-strong);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.detail .sense-card .slabel .tick {
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.detail .sense-card .badge-now {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-s);
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.detail .sense-card .sdetail {
+  margin-top: 3px;
+  color: var(--fg);
+  font-size: 12.5px;
+  line-height: 1.85;
+}
+
+.detail .sense-card .sexample {
+  margin-top: 6px;
+  padding-left: 9px;
+  border-left: 1px solid var(--line-strong);
+}
+
+.detail .sense-card .sexample .jp {
+  display: block;
+  font-family: var(--font-serif-ja);
+  font-size: 13.5px;
+  color: var(--fg-strong);
+}
+
+.detail .sense-card .sexample em {
+  display: block;
+  margin-top: 1px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.detail .sense-all {
+  margin-top: 10px;
+}
+
+.detail .sense-all > summary {
+  cursor: pointer;
+  padding: 3px 0;
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  list-style: none;
+}
+
+.detail .sense-all > summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail .sense-all > summary::before {
+  content: '▸ ';
+  color: var(--fg-faint);
+}
+
+.detail .sense-all[open] > summary::before {
+  content: '▾ ';
+}
+
+.detail .sense-all > summary:hover {
+  color: var(--accent);
+}
+
+.detail .sense-list {
+  margin-top: 6px;
+}
+
+/* styles.css 里 .sense-list 已经是 flex + gap，这里别再叠一层 margin */
+.detail .sense-list .sense-card + .sense-card {
+  margin-top: 0;
+}
+
+/* ═══════════════════════════ 6. 词典分组与词条 ═══════════════════════════ */
+
+.detail .glossary {
+  min-width: 0;
+}
+
+.detail .dictgroup + .dictgroup {
+  margin-top: 16px;
+}
+
+.detail .dictgroup > .dt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 2px 0 4px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+}
+
+.detail .dictgroup > .dt .dt-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fg-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail .dictgroup > .dt .dt-count {
+  margin-left: auto;
+  color: var(--fg-faint);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.detail .entry {
+  min-width: 0;
+  padding: 10px 0 12px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.detail .entry:last-of-type {
+  border-bottom: 0;
+}
+
+.detail .entry-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 7px;
+  margin-bottom: 5px;
+}
+
+.detail .entry-term {
+  font-family: var(--font-serif-ja);
+  font-size: 17px;
+  color: var(--fg-strong);
+  letter-spacing: 0.02em;
+}
+
+.detail .entry-reading {
+  font-family: var(--font-serif-ja);
+  font-size: 12.5px;
+  color: var(--fg-muted);
+}
+
+/* 同音号与罗马字——从辞典词头行提上来，紧跟读音 */
+.detail .entry-idx {
+  align-self: center;
+  min-width: 1.15em;
+  padding: 0 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.detail .entry-romaji {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.detail .entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0.45;
+  transition: opacity var(--dur);
+}
+
+.detail .entry:hover .entry-actions,
+.detail .entry-actions:focus-within {
+  opacity: 1;
+}
+
+.detail .entry-actions .gx-toggle {
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.detail .entry-via {
+  margin-bottom: 4px;
+  font-family: var(--font-serif-ja);
+  font-size: 11.5px;
+  color: var(--fg-faint);
+}
+
+.detail .gloss {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--fg);
+}
+
+/* 纯文本安全网：即使解析器完全没识别出结构，换行也是对的 */
+.detail .gloss-line {
+  margin: 0 0 4px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.detail .gloss-list {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.detail .gloss-list li {
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+}
+
+.detail .gloss-figure {
+  margin: 6px 0;
+}
+
+.detail .gloss-figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line-soft);
+}
+
+.detail .sc-fallback .sc-fallback-hint {
+  margin-bottom: 3px;
+  font-size: 11px;
+}
+
+.detail .gloss-plain {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 13px;
+}
+
+.detail .gloss-plain li {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── MDict 原生 HTML ────────────────────────────────────── */
+/*
+ * 词典自带 CSS 会在运行时加载，而且已经由服务端限定到 `.mdx-dict-<id>`。
+ * 这里用更高特异性做应用层兜底：保留原词典版式，同时确保窄栏、明暗主题和中日双语可读。
+ */
+.detail .gloss .mdx-html {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--fg) !important;
+  background: transparent !important;
+  font-family: var(--font-serif-ja);
+  font-size: 13.5px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+.detail .gloss .mdx-html * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.detail .gloss .mdx-html img,
+.detail .gloss .mdx-html table {
+  max-width: 100%;
+}
+
+.detail .gloss .mdx-html img {
+  height: auto;
+}
+
+.detail .gloss .mdx-html a {
+  color: var(--accent) !important;
+  text-decoration-color: var(--accent-line);
+  text-underline-offset: 0.16em;
+}
+
+.detail .gloss .mdx-html .title,
+.detail .gloss .mdx-html .head,
+.detail .gloss .mdx-html .word {
+  color: var(--fg-strong) !important;
+}
+
+.detail .gloss .mdx-html .head {
+  margin-bottom: 0.35em;
+}
+
+.detail .gloss .mdx-html .dfjp {
+  color: var(--fg-strong) !important;
+}
+
+.detail .gloss .mdx-html .dfcn,
+.detail .gloss .mdx-html .excn {
+  color: var(--fg-muted) !important;
+}
+
+.detail .gloss .mdx-html .exam,
+.detail .gloss .mdx-html .exjp,
+.detail .gloss .mdx-html .excn {
+  overflow-wrap: anywhere;
+}
+
+.detail .gloss .mdx-html .type,
+.detail .gloss .mdx-html .num,
+.detail .gloss .mdx-html .yufa,
+.detail .gloss .mdx-html .biaoxian,
+.detail .gloss .mdx-html .biaoji,
+.detail .gloss .mdx-html .yuyuan {
+  color: var(--accent-2) !important;
+}
+
+.detail .gloss .mdx-html [style*='background'],
+.detail .gloss .mdx-html [bgcolor] {
+  background-color: transparent !important;
+}
+
+/* ═══════════════════════════ 7. 研究社式释义（.gx*） ═══════════════════════════ */
+
+.gx {
+  min-width: 0;
+  font-family: var(--font-serif);
+}
+
+/* ── 词头行 ────────────────────────────────────────────── */
+
+/* 只在释义自带的词形与词条头不一致时才出现，所以做成一条弱化的注释行 */
+.gx-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  margin-bottom: 7px;
+  padding-bottom: 5px;
+  border-bottom: 1px dotted var(--line);
+}
+
+.gx-head-label {
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+}
+
+.gx-head-kanji {
+  font-family: var(--font-serif-ja);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--fg-strong);
+  letter-spacing: 0.03em;
+}
+
+.gx-head-kana {
+  font-family: var(--font-serif-ja);
+  font-size: 12px;
+  color: var(--fg-muted);
+  letter-spacing: 0.06em;
+}
+
+.gx-head-idx {
+  align-self: center;
+  min-width: 1.15em;
+  padding: 0 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ── 义项 ──────────────────────────────────────────────── */
+
+.gx-sense + .gx-sense {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* 编号悬挂在左页边 */
+.gx-sense-head {
+  display: grid;
+  grid-template-columns: 1.55em 1fr;
+  gap: 0 0.45em;
+  align-items: start;
+}
+
+.gx-sense-head:has(+ .gx-exlist) {
+  margin-bottom: 3px;
+}
+
+.gx-num {
+  display: grid;
+  place-items: center;
+  min-width: 1.45em;
+  height: 1.45em;
+  margin-top: 0.28em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--fg-strong);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.gx-sense-body {
+  grid-column: 2;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* 没有编号的隐式义项：正文占满整行 */
+.gx-sense-head:not(:has(.gx-num)) .gx-sense-body {
+  grid-column: 1 / -1;
+}
+
+/* ── 例句 ──────────────────────────────────────────────── */
+
+/* 左侧一条细竖线，内边距要能容下悬挂的 ▸ / · 标记 */
+.gx-exlist {
+  margin-top: 5px;
+  margin-left: 0.35em;
+  padding-left: 1.05em;
+  border-left: 1px solid var(--line);
+}
+
+.gx-ex {
+  padding: 2px 0;
+}
+
+/* 下一组主例开始前多留一点空，强化「一组」的感觉 */
+.gx-ex + .gx-ex.primary {
+  margin-top: 6px;
+}
+
+.gx-ex-ja {
+  position: relative;
+  font-family: var(--font-serif-ja);
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--fg-strong);
+  overflow-wrap: break-word;
+}
+
+/*
+ * 主例与子例不靠缩进量区分，而是靠形状不同的悬挂标记：
+ *   主例 = 实心小方块（强调色）   子例 = 一条短横线（弱化）
+ * 这样即使缩进差很小也能一眼看出哪条是主例。
+ */
+.gx-ex-mark {
+  position: absolute;
+  top: 0.85em;
+  display: block;
+}
+
+.gx-ex.primary > .gx-ex-ja {
+  font-weight: 500;
+}
+
+.gx-ex.primary > .gx-ex-ja > .gx-ex-mark {
+  left: -0.82em;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+}
+
+.gx-ex.sub > .gx-ex-ja > .gx-ex-mark {
+  top: 0.9em;
+  left: -0.85em;
+  width: 5px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* 一条主例下面的子例组：再缩进一级，竖线更淡 */
+.gx-exsub {
+  margin: 1px 0 3px 0.15em;
+  padding-left: 0.85em;
+  border-left: 1px solid var(--line-soft);
+}
+
+/* 义项下只有一组主例时拉平：子例与主例同一缩进，只用标记区分主次 */
+.gx-exlist.flat .gx-exsub {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.gx-exsub .gx-ex-ja {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--fg);
+}
+
+.gx-exsub .gx-ex-tr {
+  font-size: 12px;
+}
+
+.gx-ex-tr {
+  margin-top: 0;
+  color: var(--fg-muted);
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+.gx-ex.primary > .gx-ex-tr {
+  color: var(--fg);
+}
+
+/* ── 折叠按钮 ──────────────────────────────────────────── */
+
+.gx-more {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+
+.gx-more:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.gx-more + .gx-more {
+  margin-left: 5px;
+}
+
+.gx-more.block {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ── 複合語・派生 ──────────────────────────────────────── */
+
+.gx-trailing {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.gx-trailing-label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: var(--fg-faint);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.gx-trailing-count {
+  padding: 0 0.3em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.gx-sub {
+  padding: 2px 0;
+}
+
+.gx-sub-ja {
+  font-family: var(--font-serif-ja);
+  font-size: 13px;
+  color: var(--fg-strong);
+  overflow-wrap: break-word;
+}
+
+.gx-sub-mark {
+  margin-right: 0.3em;
+  color: var(--accent-2);
+  font-size: 0.85em;
+}
+
+.gx-sub-tr {
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+
+.gx-note,
+.gx-para {
+  margin: 4px 0 0;
+  overflow-wrap: break-word;
+}
+
+.gx-note {
+  padding-left: 0.8em;
+  border-left: 1px solid var(--line);
+  color: var(--fg-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.gx-note::before {
+  content: '▶';
+  margin-right: 0.35em;
+  color: var(--fg-faint);
+  font-size: 0.8em;
+}
+
+/* ── 行内记号 ──────────────────────────────────────────── */
+
+/* 〔…〕语义・使用场合限定：弱化的方头小标签 */
+.gx-domain {
+  display: inline-block;
+  margin-right: 0.3em;
+  padding: 0 0.32em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  font-family: var(--font-serif-ja);
+  font-size: 0.8em;
+  font-weight: 400;
+  line-height: 1.6;
+  vertical-align: 1px;
+  white-space: normal;
+}
+
+/* 【…】专业领域 */
+.gx-field {
+  display: inline-block;
+  margin-right: 0.3em;
+  padding: 0 0.32em;
+  border-radius: var(--radius-s);
+  background: var(--accent-2-soft);
+  color: var(--accent-2);
+  font-family: var(--font-serif-ja);
+  font-size: 0.78em;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+}
+
+/* 《…》语域・地域标签 */
+.gx-register {
+  color: var(--accent-2);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.gx-register::before {
+  content: '《';
+  opacity: 0.55;
+}
+
+.gx-register::after {
+  content: '》';
+  opacity: 0.55;
+}
+
+/* 〈…〉对译词的用法说明 */
+.gx-usage {
+  color: var(--fg-muted);
+  font-size: 0.85em;
+}
+
+.gx-usage::before {
+  content: '〈';
+  opacity: 0.55;
+}
+
+.gx-usage::after {
+  content: '〉';
+  opacity: 0.55;
+}
+
+/* 〚…〛词源 */
+.gx-etym {
+  margin-right: 0.25em;
+  padding: 0 0.3em;
+  border: 1px dotted var(--line-strong);
+  color: var(--fg-faint);
+  font-family: var(--font-mono);
+  font-size: 0.74em;
+  letter-spacing: 0.04em;
+}
+
+/* (…) 对译词的中文／日文补充说明 */
+.gx-glossnote {
+  color: var(--fg-faint);
+  font-family: var(--font-serif-ja);
+  font-size: 0.82em;
+  /* 括注是一个整体，断在中间会留下「（社会」这样的孤儿行尾 */
+  white-space: nowrap;
+}
+
+/* ┏A [B] 可替换 */
+.gx-alt {
+  border-bottom: 1px dotted var(--line-strong);
+}
+
+.gx-alt-opt {
+  margin-left: 0.15em;
+  color: var(--fg-faint);
+  font-size: 0.9em;
+}
+
+/* ⇒ 参见 */
+.gx-xref {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.12em;
+  margin: 0 0.1em;
+  padding: 0 0.32em;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88em;
+  line-height: 1.55;
+  vertical-align: 1px;
+  transition: background var(--dur), color var(--dur);
+}
+
+.gx-xref .jp {
+  font-family: var(--font-serif-ja);
+}
+
+.gx-xref .gx-xref-mark {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.gx-xref:hover {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.gx-xref.off {
+  border-style: dotted;
+  border-color: var(--line-strong);
+  color: var(--fg-faint);
+  cursor: default;
+}
+
+/* ｜可选译法分隔。这是语义标记（切开并列译法），不是装饰，要看得见 */
+.gx-sep {
+  margin: 0 0.15em;
+  color: var(--fg-faint);
+  font-size: 0.85em;
+}
+
+/* ▶ 行内编者注记 */
+.gx-inline-note {
+  display: inline;
+  color: var(--fg-faint);
+  font-size: 0.86em;
+}
+
+.gx-inline-note::before {
+  content: '▶';
+  margin: 0 0.25em 0 0.3em;
+  font-size: 0.85em;
+}
+
+/* *word 美式 / ᐦword 文语 */
+.gx-mark {
+  position: relative;
+}
+
+.gx-mark.us::before {
+  content: '*';
+  color: var(--warn);
+  font-size: 0.9em;
+  vertical-align: 0.25em;
+}
+
+.gx-mark.literary {
+  border-bottom: 1px dotted var(--accent-2);
+}
+
+.gx-mark.literary::before {
+  content: 'ᐦ';
+  color: var(--accent-2);
+  font-size: 0.85em;
+}
+
+/* ═══════════════════════════ 8. structured-content ═══════════════════════════ */
+
+.detail .sc-root {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  overflow-wrap: break-word;
+}
+
+.detail .sc-root div {
+  display: block;
+}
+
+.detail .sc-root ul,
+.detail .sc-root ol {
+  margin: 2px 0;
+  padding-left: 1.4em;
+}
+
+.detail .sc-root li {
+  margin: 1px 0;
+}
+
+.detail .sc-root li::marker {
+  color: var(--fg-faint);
+  font-size: 0.85em;
+}
+
+.detail .sc-root ruby rt {
+  font-size: 0.5em;
+  color: var(--fg-muted);
+  line-height: 1;
+  text-align: center;
+}
+
+.detail .sc-root img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.detail .sc-table-wrap {
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.detail .sc-root table {
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.detail .sc-root th,
+.detail .sc-root td {
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.detail .sc-root th {
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.detail .sc-root details {
+  margin: 4px 0;
+}
+
+.detail .sc-root summary {
+  cursor: pointer;
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+}
+
+.detail .sc-link {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--accent-line);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color var(--dur), color var(--dur);
+}
+
+.detail .sc-link:hover {
+  border-bottom-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+/* Yomitan 常见的 data-sc-content 值 */
+.detail [data-sc-content='glossary'] {
+  display: block;
+}
+
+.detail [data-sc-content='sense'] {
+  display: block;
+  margin: 3px 0;
+}
+
+.detail [data-sc-content='example-sentence'],
+.detail [data-sc-content='example-sentence-a'],
+.detail [data-sc-content='example-sentence-b'] {
+  display: block;
+  margin: 3px 0 3px 0.35em;
+  padding-left: 0.75em;
+  border-left: 1px solid var(--line);
+  font-family: var(--font-serif-ja);
+  font-size: 13.5px;
+}
+
+.detail [data-sc-content='example-sentence-translation'],
+.detail [data-sc-content='example-sentence-b'] {
+  color: var(--fg-muted);
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+}
+
+.detail [data-sc-content='extra-info'],
+.detail [data-sc-content='attribution'],
+.detail [data-sc-content='disambiguation'],
+.detail [data-sc-content='antonym'],
+.detail [data-sc-content='form-of'] {
+  color: var(--fg-faint);
+  font-size: 0.88em;
+}
+
+.detail [data-sc-content='tags'],
+.detail [data-sc-content='tag'] {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 0.32em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+}
+
+.detail [data-sc-content='pitch-accent'],
+.detail [data-sc-content='pitch-accent-list'],
+.detail [data-sc-content='pitch'] {
+  font-family: var(--font-serif-ja);
+}
+
+.detail [data-sc-content='pitch-accent-downstep-notation'] {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.detail .sc-root [data-sc-unknown-tag] {
+  display: inline;
+}
+
+/* ═══════════════════════════ 9. 汉字 ═══════════════════════════ */
+
+.detail .kanji-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail .kanji-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.detail .kanji-char {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  padding: 10px 6px;
+  border-right: 1px solid var(--line);
+  background: var(--bg-tint);
+  font-family: var(--font-serif-ja);
+  font-size: 46px;
+  line-height: 1;
+  color: var(--fg-strong);
+}
+
+.detail .kanji-info {
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.detail .kanji-info .krow {
+  display: grid;
+  grid-template-columns: 1.5em 1fr;
+  gap: 0 6px;
+  align-items: baseline;
+  padding: 1px 0;
+  font-size: 12.5px;
+}
+
+.detail .kanji-info .krow + .krow {
+  border-top: 1px solid var(--line-soft);
+}
+
+.detail .kanji-info .k {
+  color: var(--fg-faint);
+  font-family: var(--font-serif-ja);
+  font-size: 10.5px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  line-height: 1.5;
+}
+
+.detail .kanji-info .v {
+  min-width: 0;
+  color: var(--fg);
+  overflow-wrap: break-word;
+}
+
+.detail .kanji-info .v.jp {
+  font-family: var(--font-serif-ja);
+}
+
+.detail .kanji-info .meanings {
+  color: var(--fg-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.detail .kanji-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.detail .kstat {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  line-height: 1.7;
+  overflow: hidden;
+}
+
+.detail .kstat-k {
+  padding: 0 4px;
+  background: var(--surface-2);
+  color: var(--fg-faint);
+}
+
+.detail .kstat-v {
+  padding: 0 4px;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.detail .kanji-src {
+  margin-top: 5px;
+  font-size: 10.5px;
+}
+
+/* ═══════════════════════════ 10. 声调曲线 ═══════════════════════════ */
+
+.detail .pitch-block {
+  padding: 6px 0;
+}
+
+.detail .pitch-block + .pitch-block {
+  border-top: 1px solid var(--line-soft);
+}
+
+.detail .pitch-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.detail .pitch-meta .pattern {
+  color: var(--fg-strong);
+  font-family: var(--font-serif-ja);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+}
+
+.detail .pitch-meta .core b {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.detail .pitch-meta .src {
+  margin-left: auto;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail .pitch-svg {
+  display: block;
+  max-width: 100%;
+  margin-top: 2px;
+  overflow: visible;
+}
+
+.detail .pitch-svg .pbase {
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+
+.detail .pitch-svg .pdrop {
+  stroke: var(--accent-line);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.detail .pitch-svg .pline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.detail .pitch-svg .pdot {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 1.25;
+}
+
+.detail .pitch-svg .pdot.tail {
+  stroke-dasharray: 2 1.6;
+  stroke: var(--fg-faint);
+}
+
+.detail .pitch-svg .pmora {
+  fill: var(--fg-muted);
+  font-family: var(--font-serif-ja);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.detail .pitch-svg .pmora.tail {
+  fill: var(--fg-faint);
+}
+
+/* ═══════════════════════════ 11. 窄栏与降级 ═══════════════════════════ */
+
+/* 侧栏更窄时进一步压缩 */
+@media (max-width: 400px) {
+  .detail .section {
+    padding: 12px 12px 14px;
+  }
+
+  .detail .wordhead {
+    padding: 12px 12px 10px;
+  }
+
+  .detail .wordhead .surface {
+    font-size: 26px;
+  }
+
+  .detail .kanji-char {
+    width: 60px;
+    font-size: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail .gx-xref,
+  .detail .gx-more,
+  .detail .arg-card,
+  .detail .entry-actions {
+    transition: none;
+  }
+}

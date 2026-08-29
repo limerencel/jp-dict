@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="日语句子语法解析：逐句拆解词单位、助词、活用，并查词典与翻译。" />
+    <title>日本語文法解析 · 日语语法解析</title>
+    <script>
+      // 在首屏绘制前套用主题与底色，避免深浅色闪烁
+      try {
+        var t = localStorage.getItem('jp-sentence.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+      document.documentElement.style.background =
+        document.documentElement.dataset.theme === 'light' ? '#f4ede1' : '#14110e';
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
