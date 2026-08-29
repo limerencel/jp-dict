@@ -271,7 +271,7 @@ async function route(req: http.IncomingMessage, res: Res): Promise<void> {
     res.writeHead(200, {
       'content-type': 'text/css; charset=utf-8',
       'content-length': body.length,
-      'cache-control': 'public, max-age=3600',
+      'cache-control': 'no-cache',
     });
     return void res.end(body);
   }

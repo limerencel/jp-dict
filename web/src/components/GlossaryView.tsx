@@ -442,14 +442,22 @@ interface NodeProps {
  * MDX HTML 已在服务端消毒。这里仍只把它放进词典专属容器，确保配套 CSS
  * 只能命中当前词条；内部 `?query=` 链接复用详情面板现有的查词历史。
  */
+const MDICT_STYLE_REVISION = '2';
+
 function MdictHtml({ html, dictId, onLookup }: { html: string; dictId: number; onLookup: (query: string) => void }): JSX.Element {
   useEffect(() => {
     const id = `mdx-style-${dictId}`;
-    if (document.getElementById(id)) return;
+    const href = `/api/dictionaries/${dictId}/style.css?v=${MDICT_STYLE_REVISION}`;
+    const existing = document.getElementById(id);
+    if (existing instanceof HTMLLinkElement) {
+      // Fast Refresh 不会重建 document.head；版本变化时必须显式换掉旧链接。
+      if (existing.getAttribute('href') !== href) existing.href = href;
+      return;
+    }
     const link = document.createElement('link');
     link.id = id;
     link.rel = 'stylesheet';
-    link.href = `/api/dictionaries/${dictId}/style.css`;
+    link.href = href;
     document.head.appendChild(link);
   }, [dictId]);
 
