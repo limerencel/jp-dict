@@ -1780,6 +1780,107 @@ a {
   padding-left: 1.3em;
 }
 
+/* 手机：详情占满屏幕，词典管理改为可纵向阅读的列表 */
+@media (max-width: 640px) {
+  .app {
+    height: 100dvh;
+  }
+  .topbar {
+    height: calc(46px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+  .sidebar {
+    inset: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 100dvh;
+    border-left: 0;
+    box-shadow: none;
+  }
+  .sidebar-head {
+    padding-top: max(4px, env(safe-area-inset-top));
+  }
+  .sidebar-head .btn.icon,
+  .detail-nav .btn.icon,
+  .modal-head .btn.icon {
+    width: 40px;
+    height: 40px;
+  }
+  .detail-nav button[aria-label='关闭详情'] {
+    display: none;
+  }
+  .detail-body {
+    padding-bottom: max(60px, env(safe-area-inset-bottom));
+  }
+  .scrim {
+    display: none;
+  }
+
+  .overlay {
+    padding: 0;
+  }
+  .modal {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .modal-head {
+    gap: 6px;
+    padding: max(4px, env(safe-area-inset-top)) 10px 4px;
+  }
+  .modal-head h2,
+  .modal-head .chiptag {
+    flex: none;
+    white-space: nowrap;
+  }
+  .modal-body {
+    padding: 10px 16px max(20px, env(safe-area-inset-bottom));
+  }
+  .dict-table,
+  .dict-table tbody {
+    display: block;
+  }
+  .dict-table thead {
+    display: none;
+  }
+  .dict-table tr {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 7px 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .dict-table td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+  .dict-table td:nth-child(1) { grid-area: 1 / 1; align-self: center; }
+  .dict-table td:nth-child(2) { grid-area: 1 / 2 / 2 / 4; }
+  .dict-table td:nth-child(3) { grid-area: 2 / 2; }
+  .dict-table td:nth-child(4) { grid-area: 3 / 2; text-align: left; }
+  .dict-table td:nth-child(5) { grid-area: 4 / 2; text-align: left; }
+  .dict-table td:nth-child(6) { grid-area: 2 / 3 / 5 / 4; align-self: end; }
+  .dict-table td:nth-child(4)::before { content: '条目 '; color: var(--fg-faint); }
+  .dict-table td:nth-child(5)::before { content: '优先级 '; color: var(--fg-faint); }
+  .dict-table .switch {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+  .dict-table .acts .btn.icon {
+    width: 40px;
+    height: 40px;
+  }
+  .dict-table .sub {
+    overflow-wrap: anywhere;
+  }
+}
+
 /* ───────────────────────────── 动效降级 ───────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
