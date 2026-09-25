@@ -14,9 +14,8 @@
     "start": "node --no-warnings=ExperimentalWarning --env-file-if-exists=.env server/index.ts",
     "dict:import": "tsx --no-warnings=ExperimentalWarning --env-file-if-exists=.env server/dict/cli.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "test": "npm run typecheck && npm run test:dict && npm run test:analyze && npm run test:gloss && npm run test:translate && npm run test:e2e",
+    "test": "npm run typecheck && npm run test:dict && npm run test:analyze && npm run test:gloss && npm run test:e2e",
     "test:gloss": "tsx web/src/lib/glossFormat.test.ts",
-    "test:translate": "tsx --no-warnings=ExperimentalWarning server/translate/selftest.ts",
     "test:dict": "tsx --no-warnings=ExperimentalWarning server/dict/selftest.ts",
     "test:analyze": "tsx --no-warnings=ExperimentalWarning server/analyze/selftest.ts",
     "test:e2e": "tsx --no-warnings=ExperimentalWarning server/e2e.ts"

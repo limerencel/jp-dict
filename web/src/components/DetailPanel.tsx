@@ -6,16 +6,15 @@
  * 正文用衬线，所有间距都按 440px 窄栏调过，不允许横向溢出。
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { DictEntry, LookupResponse, Word } from '@shared/types';
+import type { LookupResponse, Word } from '@shared/types';
 import { toRomaji } from '@shared/kana';
-import { glossaryToText } from '@shared/glossary';
 import { errorText, lookup } from '../api';
 import { mockLookup } from '../mock';
 import { useAppState, useDispatch, useWordIndex } from '../state';
 import { GlossaryView } from './GlossaryView';
 import { KanjiView } from './KanjiView';
 import { PitchCurve } from './PitchCurve';
-import { IconChevronLeft, IconChevronRight, IconClose, IconSparkle } from './Icons';
+import { IconChevronLeft, IconChevronRight, IconClose } from './Icons';
 
 type Target = { kind: 'word'; wordId: number } | { kind: 'query'; text: string };
 
@@ -125,23 +124,6 @@ export function DetailPanel(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, demo]);
 
-  const askAi = useCallback(
-    (prompt: string) => {
-      dispatch({ type: 'ai/seed', prompt, wordId: word?.id ?? null, send: false });
-    },
-    [dispatch, word],
-  );
-
-  const askAboutEntry = useCallback(
-    (entry: DictEntry) => {
-      const text = glossaryToText(entry.glossary, 400);
-      askAi(
-        `请解释「${entry.term}${entry.reading && entry.reading !== entry.term ? `（${entry.reading}）` : ''}」这条释义，并给出用法要点：\n${text}`,
-      );
-    },
-    [askAi],
-  );
-
   const headTitle = current?.kind === 'query' ? current.text : word?.surface ?? '';
 
   return (
@@ -194,7 +176,7 @@ export function DetailPanel(): JSX.Element {
           </div>
         ) : null}
 
-        {word ? <WordSections word={word} byId={byId} onAskAi={askAi} /> : null}
+        {word ? <WordSections word={word} byId={byId} /> : null}
 
         {current?.kind === 'query' ? (
           <div className="wordhead">
@@ -205,7 +187,7 @@ export function DetailPanel(): JSX.Element {
           </div>
         ) : null}
 
-        {current ? <LookupSections state={look} onInternalLookup={onInternalLookup} onAskAi={askAboutEntry} /> : null}
+        {current ? <LookupSections state={look} onInternalLookup={onInternalLookup} /> : null}
       </div>
     </div>
   );
@@ -216,10 +198,9 @@ export function DetailPanel(): JSX.Element {
 interface WordSectionsProps {
   word: Word;
   byId: Map<number, Word>;
-  onAskAi: (prompt: string) => void;
 }
 
-function WordSections({ word, byId, onAskAi }: WordSectionsProps): JSX.Element {
+function WordSections({ word, byId }: WordSectionsProps): JSX.Element {
   const dispatch = useDispatch();
   const romaji = word.particle?.romaji ?? toRomaji(word.reading || word.surface);
   const inflection = word.inflection;
@@ -260,17 +241,6 @@ function WordSections({ word, byId, onAskAi }: WordSectionsProps): JSX.Element {
               {f.dictTitle} {f.displayValue}
             </span>
           ))}
-        </div>
-        <div className="wordhead-actions">
-          <button
-            className="btn sm"
-            type="button"
-            onClick={() =>
-              onAskAi(`请解释「${word.surface}」（${word.reading}，${word.posLabel}）在这句话里的意思和用法。`)
-            }
-          >
-            <IconSparkle /> 问 AI
-          </button>
         </div>
       </div>
 
@@ -453,10 +423,9 @@ function WordSections({ word, byId, onAskAi }: WordSectionsProps): JSX.Element {
 interface LookupSectionsProps {
   state: LookupState;
   onInternalLookup: (query: string) => void;
-  onAskAi: (entry: DictEntry) => void;
 }
 
-function LookupSections({ state, onInternalLookup, onAskAi }: LookupSectionsProps): JSX.Element {
+function LookupSections({ state, onInternalLookup }: LookupSectionsProps): JSX.Element {
   const { loading, data, error } = state;
 
   const extraPitch = useMemo(() => data?.pitch ?? [], [data]);
@@ -505,7 +474,7 @@ function LookupSections({ state, onInternalLookup, onAskAi }: LookupSectionsProp
       <section className="section">
         <SectionHead count={data.entries.length > 0 ? `${data.entries.length} 条` : undefined}>词典释义</SectionHead>
         {data.entries.length > 0 ? (
-          <GlossaryView entries={data.entries} onInternalLookup={onInternalLookup} onAskAi={onAskAi} />
+          <GlossaryView entries={data.entries} onInternalLookup={onInternalLookup} />
         ) : (
           <p className="note faint">
             未在已启用的词典中找到「{data.query}」。可在「词典」中确认是否已导入并启用相关词典。

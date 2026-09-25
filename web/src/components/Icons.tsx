@@ -48,13 +48,6 @@ export const IconBook = (p: P): JSX.Element => (
   </Svg>
 );
 
-export const IconSparkle = (p: P): JSX.Element => (
-  <Svg {...p}>
-    <path d="M8 2.2 9.4 6 13 7.4 9.4 8.8 8 12.6 6.6 8.8 3 7.4 6.6 6z" />
-    <path d="M12.6 11.4 13 12.6l1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4z" />
-  </Svg>
-);
-
 export const IconRefresh = (p: P): JSX.Element => (
   <Svg {...p}>
     <path d="M13.5 8a5.5 5.5 0 1 1-1.7-3.9" />
@@ -120,34 +113,8 @@ export const IconPanelRight = (p: P): JSX.Element => (
   </Svg>
 );
 
-export const IconStop = (p: P): JSX.Element => (
-  <Svg {...p}>
-    <rect x="4" y="4" width="8" height="8" rx="1.5" fill="currentColor" />
-  </Svg>
-);
-
 export const IconSend = (p: P): JSX.Element => (
   <Svg {...p}>
     <path d="M14 2 7.2 8.8M14 2l-4.4 12-2.4-5.2L2 6.4z" />
-  </Svg>
-);
-
-export const IconChevronDown = (p: P): JSX.Element => (
-  <Svg {...p}>
-    <path d="m3 6 5 5 5-5" />
-  </Svg>
-);
-
-export const IconChevronUp = (p: P): JSX.Element => (
-  <Svg {...p}>
-    <path d="m3 10 5-5 5 5" />
-  </Svg>
-);
-
-/** 译文：左文右字 */
-export const IconTranslate = (p: P): JSX.Element => (
-  <Svg {...p}>
-    <path d="M1.6 3.6h6M4.6 2.2v1.4M6.3 3.6c0 2.6-1.7 4.6-4.7 5.6M3.2 6.1c.9 1.5 2.2 2.4 3.9 2.9" />
-    <path d="m8.4 14 3-8 3 8M9.5 11.6h3.8" />
   </Svg>
 );

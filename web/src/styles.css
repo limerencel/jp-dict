@@ -363,59 +363,6 @@ a {
   color: var(--fg-on-accent);
 }
 
-/* 原生 select 的三角和圆角跟这套方正语言完全冲突，这里自己画箭头 */
-.selectwrap {
-  position: relative;
-  display: inline-flex;
-}
-.selectwrap::after {
-  content: '';
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  margin-top: -5px;
-  border-right: 1.4px solid var(--fg-muted);
-  border-bottom: 1.4px solid var(--fg-muted);
-  transform: rotate(45deg);
-  pointer-events: none;
-}
-.selectwrap:hover::after {
-  border-color: var(--fg-strong);
-}
-.select {
-  appearance: none;
-  -webkit-appearance: none;
-  height: 26px;
-  padding: 0 22px 0 9px;
-  font-family: var(--font-ui);
-  font-size: 11.5px;
-  line-height: 24px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
-  background: var(--surface);
-  color: var(--fg);
-  cursor: pointer;
-  transition: background var(--dur), border-color var(--dur);
-}
-.select:hover:not(:disabled) {
-  background: var(--surface-3);
-}
-.select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-.select:disabled {
-  opacity: 0.42;
-  cursor: not-allowed;
-}
-/* 下拉展开后的选项列表仍由系统绘制，至少让配色跟上主题 */
-.select option {
-  background: var(--surface);
-  color: var(--fg);
-}
-
 /* 小方框复选 */
 .switch {
   display: inline-flex;
@@ -533,16 +480,6 @@ a {
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 0.7;
   }
 }
 
@@ -781,7 +718,6 @@ a {
   flex: 1;
 }
 /* composer 内的控件跟发送按钮齐高 */
-.composer-bar .select,
 .composer-bar .btn.sm {
   height: 28px;
 }
@@ -987,16 +923,6 @@ a {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.toolbar-note {
-  width: 100%;
-  font-family: var(--font-serif);
-  font-size: 11.5px;
-  color: var(--fg-faint);
-  padding-left: 2px;
-  border-left: 2px solid var(--line);
-  padding: 1px 0 1px 8px;
-}
-
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -1072,36 +998,6 @@ a {
     transparent 100%
   );
   opacity: 0.45;
-}
-
-/* 每句译文 */
-.sentence-tr {
-  margin-top: 12px;
-  padding-left: 13px;
-  border-left: 2px solid var(--line-strong);
-  font-family: var(--font-serif);
-  font-size: 15.5px;
-  line-height: 1.9;
-  letter-spacing: 0.01em;
-  color: var(--fg-muted);
-}
-.sentence-tr.is-loading {
-  border-left-color: var(--line);
-}
-.sentence-tr .sk {
-  display: block;
-  height: 0.72em;
-  background: var(--surface-3);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-.sentence-tr .sk + .sk {
-  margin-top: 7px;
-  width: 62%;
-}
-.sentence-tr.is-error {
-  border-left-color: var(--danger);
-  color: var(--danger);
-  font-size: 12.5px;
 }
 
 @media (max-width: 900px) {
@@ -1418,83 +1314,30 @@ a {
   }
 }
 
-.tabs {
+.sidebar-head {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   flex: none;
-  padding: 0 6px 0 0;
+  padding: 4px 8px 4px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--bg-tint);
-}
-.tabs button {
-  padding: 9px 14px 8px;
   font-family: var(--font-serif);
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: var(--fg-muted);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color var(--dur), border-color var(--dur), background var(--dur);
-}
-.tabs button:hover {
   color: var(--fg-strong);
 }
-.tabs button[aria-selected='true'] {
-  color: var(--fg-strong);
-  border-bottom-color: var(--accent);
-  background: var(--surface);
-}
-.tabs .spacer {
+.sidebar-head .spacer {
   flex: 1;
 }
-.tabs .close {
+.sidebar-head .close {
   align-self: center;
   margin-left: 4px;
 }
-.tabpane {
+.sidebar-pane {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-.tabpane[hidden] {
-  display: none;
-}
-
-/* 侧栏内「翻译这句」小卡 */
-.trcard {
-  flex: none;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--bg-tint);
-}
-.trcard .row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.trcard .src {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-serif-ja);
-  font-size: 13px;
-  color: var(--fg-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.trcard .out {
-  margin-top: 6px;
-  padding-left: 10px;
-  border-left: 2px solid var(--accent-line);
-  font-size: 13px;
-  line-height: 1.85;
-  color: var(--fg);
-}
-.trcard .out.is-error {
-  border-left-color: var(--danger);
-  color: var(--danger);
-  font-size: 12px;
 }
 
 /* ───────────────────────────── 详情面板（骨架部分） ───────────────────────────── */
@@ -1820,202 +1663,6 @@ a {
   font-size: 12.5px;
 }
 
-/* ───────────────────────────── AI 面板 ───────────────────────────── */
-
-.chat {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-.chat-log {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding: 12px 14px 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.bubble {
-  max-width: 92%;
-  padding: 8px 12px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--line);
-  font-size: 13px;
-  line-height: 1.85;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-.bubble.user {
-  align-self: flex-end;
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-}
-.bubble.assistant {
-  align-self: flex-start;
-  background: var(--surface-2);
-}
-.bubble.error {
-  align-self: stretch;
-  background: var(--danger-soft);
-  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
-  color: var(--danger);
-  font-size: 12.5px;
-}
-.bubble .caret {
-  display: inline-block;
-  width: 6px;
-  height: 13px;
-  background: var(--accent);
-  vertical-align: -2px;
-  margin-left: 2px;
-  animation: blink 1s steps(2) infinite;
-}
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
-.chat-ctx {
-  flex: none;
-  margin: 0 14px 6px;
-  padding: 5px 9px;
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-s);
-  font-family: var(--font-ui);
-  font-size: 11px;
-  color: var(--fg-faint);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.chat-ctx .cx {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.chat-ctx.on {
-  border-style: solid;
-  border-color: var(--accent-line);
-  background: var(--accent-soft);
-  color: var(--fg-muted);
-}
-
-.chat-quick {
-  flex: none;
-  display: flex;
-  gap: 5px;
-  overflow-x: auto;
-  padding: 0 14px 6px;
-  scrollbar-width: none;
-}
-.chat-quick::-webkit-scrollbar {
-  display: none;
-}
-.chat-quick button {
-  flex: none;
-  padding: 2px 9px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
-  color: var(--fg-muted);
-  font-size: 11.5px;
-  white-space: nowrap;
-  transition: border-color var(--dur), color var(--dur);
-}
-.chat-quick button:hover:not(:disabled) {
-  border-color: var(--accent-line);
-  color: var(--accent);
-}
-
-.chat-input {
-  flex: none;
-  display: flex;
-  gap: 6px;
-  align-items: flex-end;
-  padding: 8px 14px 12px;
-  border-top: 1px solid var(--line-soft);
-}
-.chat-input textarea {
-  flex: 1;
-  resize: none;
-  min-height: 36px;
-  max-height: 160px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
-  padding: 7px 10px;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.chat-input textarea:focus {
-  outline: none;
-  border-color: var(--accent-line);
-}
-
-/* 极简 markdown */
-.md > *:first-child {
-  margin-top: 0;
-}
-.md > *:last-child {
-  margin-bottom: 0;
-}
-.md h1,
-.md h2,
-.md h3,
-.md h4 {
-  margin: 9px 0 4px;
-  font-size: 14px;
-  color: var(--fg-strong);
-}
-.md h1 {
-  font-size: 16px;
-}
-.md h2 {
-  font-size: 15px;
-}
-.md p {
-  margin: 5px 0;
-}
-.md ul,
-.md ol {
-  margin: 5px 0;
-  padding-left: 1.4em;
-}
-.md li {
-  margin: 1px 0;
-}
-.md code {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
-  background: var(--surface-3);
-  border: 1px solid var(--line);
-  border-radius: 1px;
-  padding: 0 4px;
-}
-.md pre {
-  margin: 6px 0;
-  padding: 8px 10px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  overflow-x: auto;
-}
-.md pre code {
-  border: none;
-  background: none;
-  padding: 0;
-  font-size: 12px;
-  line-height: 1.7;
-}
-.md strong {
-  color: var(--fg-strong);
-}
-
 /* ───────────────────────────── 模态框 ───────────────────────────── */
 
 .overlay {
@@ -2114,12 +1761,6 @@ a {
   justify-content: flex-end;
 }
 
-.reco {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 6px;
-}
 .callout {
   border: 1px solid var(--line);
   border-left: 3px solid var(--line-strong);
@@ -2130,20 +1771,6 @@ a {
   color: var(--fg-muted);
   line-height: 1.85;
 }
-.callout code {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 1px;
-  padding: 1px 5px;
-  color: var(--fg);
-  word-break: break-all;
-}
-.callout + .callout {
-  margin-top: 10px;
-}
-
 .import-result {
   margin-top: 12px;
   font-size: 12.5px;

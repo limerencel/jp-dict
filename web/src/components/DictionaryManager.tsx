@@ -20,24 +20,11 @@ const KIND_LABEL: Record<DictionaryKind, string> = {
   mixed: '混合',
 };
 
-const RECOMMENDED = [
-  '明鏡国語辞典',
-  '新明解国語辞典',
-  '大辞林',
-  'JMdict（日英）',
-  'JMnedict（人名地名）',
-  'NHK日本語発音アクセント辞典',
-  'CC-CEDICT / 中日辞典',
-  'Kanjium 音调词典',
-  '频率词典 JPDB / BCCWJ',
-];
-
 export function DictionaryManager(): JSX.Element | null {
-  const { dictManagerOpen, config } = useAppState();
+  const { dictManagerOpen } = useAppState();
   const dispatch = useDispatch();
 
   const [items, setItems] = useState<DictionaryMeta[]>([]);
-  const [dictDir, setDictDir] = useState('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +40,6 @@ export function DictionaryManager(): JSX.Element | null {
       try {
         const res = await listDictionaries(signal);
         setItems(res.dictionaries);
-        setDictDir(res.dictDir);
         dispatch({ type: 'config/patch', patch: { dictReady: res.ready, dictDir: res.dictDir } });
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -125,8 +111,6 @@ export function DictionaryManager(): JSX.Element | null {
   };
 
   const sorted = [...items].sort((a, b) => b.priority - a.priority || a.id - b.id);
-  const dir = dictDir || config?.dictDir || '<dictDir>';
-
   return (
     <div className="overlay" role="dialog" aria-modal="true" aria-label="词典管理" onClick={close}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -143,18 +127,6 @@ export function DictionaryManager(): JSX.Element | null {
         </div>
 
         <div className="modal-body">
-          <div className="callout">
-            把 Yomitan 词典 <b>zip</b> 或 MDict 词典 <b>mdx</b> 放进 <code>{dir}</code>，然后点右上角「重新扫描目录」即可导入。MDX 的配套 CSS/MDD 请放在同一文件夹。
-            <div className="reco">
-              <span className="faint">推荐：</span>
-              {RECOMMENDED.map((r) => (
-                <span className="chiptag" key={r}>
-                  {r}
-                </span>
-              ))}
-            </div>
-          </div>
-
           {error ? (
             <div className="banner error" style={{ margin: '10px 0 0' }}>
               <span>✕</span>

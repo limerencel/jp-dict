@@ -1,28 +1,18 @@
 /**
- * 所有后端调用的唯一出口：fetch 封装、错误归一化、SSE 解析。
+ * 所有后端调用的唯一出口：fetch 封装与错误归一化。
  */
 import type {
   AnalysisResult,
-  ChatRequest,
   DictionaryMeta,
   LookupRequest,
   LookupResponse,
-  TranslateConfig,
-  TranslateRequest,
-  TranslateResponse,
 } from '@shared/types';
 
 export interface AppConfig {
-  aiConfigured: boolean;
-  aiModel: string;
   maxTextLength: number;
   dictDir: string;
   dictReady: boolean;
-  translate: TranslateConfig;
 }
-
-/** 服务端一次最多接受的待译条数 */
-export const TRANSLATE_MAX_BATCH = 200;
 
 export interface DictionaryListResponse {
   dictionaries: DictionaryMeta[];
@@ -116,10 +106,6 @@ export function lookup(req: LookupRequest, signal?: AbortSignal): Promise<Lookup
   return postJson<LookupResponse>('/api/lookup', req, signal);
 }
 
-export function translate(req: TranslateRequest, signal?: AbortSignal): Promise<TranslateResponse> {
-  return postJson<TranslateResponse>('/api/translate', req, signal);
-}
-
 export function listDictionaries(signal?: AbortSignal): Promise<DictionaryListResponse> {
   return request<DictionaryListResponse>('/api/dictionaries', { signal });
 }
@@ -147,90 +133,4 @@ export function deleteDictionary(id: number): Promise<{ ok: true }> {
 export function mediaUrl(dictId: number, path: string): string {
   const clean = String(path).replace(/^\/+/, '');
   return `/api/media/${dictId}/${encodeURI(clean)}`;
-}
-
-/* ────────────────────────────── SSE 聊天 ────────────────────────────── */
-
-interface ChatEvent {
-  type?: string;
-  text?: string;
-  message?: string;
-}
-
-export interface ChatStreamHandlers {
-  onDelta: (text: string) => void;
-  /** 服务端在流中报告的错误（非致命，流可能仍会 DONE） */
-  onError?: (message: string) => void;
-  signal?: AbortSignal;
-}
-
-/**
- * POST + SSE：EventSource 只支持 GET，这里手动解析 text/event-stream。
- * 只识别 `data:` 行，`[DONE]` 结束。
- */
-export async function streamChat(req: ChatRequest, handlers: ChatStreamHandlers): Promise<void> {
-  let res: Response;
-  try {
-    res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-      body: JSON.stringify(req),
-      signal: handlers.signal,
-    });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return;
-    throw new ApiError('无法连接到服务器', 0, err instanceof Error ? err.message : undefined);
-  }
-
-  if (!res.ok) throw await readError(res);
-  if (!res.body) throw new ApiError('服务器未返回流式响应', res.status);
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  let done = false;
-
-  const handleLine = (rawLine: string): void => {
-    const line = rawLine.replace(/\r$/, '');
-    if (!line || line.startsWith(':')) return;
-    if (!line.startsWith('data:')) return;
-    const payload = line.slice(5).trim();
-    if (!payload) return;
-    if (payload === '[DONE]') {
-      done = true;
-      return;
-    }
-    let evt: ChatEvent;
-    try {
-      evt = JSON.parse(payload) as ChatEvent;
-    } catch {
-      return; // 忽略无法解析的片段，不要中断整条流
-    }
-    if (evt.type === 'delta' && typeof evt.text === 'string') handlers.onDelta(evt.text);
-    else if (evt.type === 'error') handlers.onError?.(evt.message || '模型返回错误');
-  };
-
-  try {
-    while (!done) {
-      const { value, done: finished } = await reader.read();
-      if (finished) break;
-      buffer += decoder.decode(value, { stream: true });
-      let nl: number;
-      while ((nl = buffer.indexOf('\n')) >= 0) {
-        handleLine(buffer.slice(0, nl));
-        buffer = buffer.slice(nl + 1);
-        if (done) break;
-      }
-    }
-    if (!done && buffer) handleLine(buffer);
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return;
-    throw err;
-  } finally {
-    try {
-      await reader.cancel();
-    } catch {
-      /* 已关闭 */
-    }
-  }
 }

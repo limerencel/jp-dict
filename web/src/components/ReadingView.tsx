@@ -22,7 +22,6 @@ import { useAppState, useDispatch, useWordIndex, type FuriganaMode } from '../st
 import { WordChip } from './WordChip';
 import { WordTooltip } from './WordTooltip';
 import { ParticleArcs } from './ParticleArcs';
-import { TranslationControls, TranslationNotice, useTranslation } from './Translation';
 
 /** 超过这个句子数才启用懒挂载 */
 const LAZY_THRESHOLD = 24;
@@ -84,8 +83,6 @@ interface SentenceBlockProps {
   /** 仅当选中词属于本句时非 null，其他句子的 props 保持不变从而跳过重渲染 */
   selectedWordId: number | null;
   lazy: boolean;
-  /** 译文：undefined = 未开启，null = 加载中 */
-  translation: string | null | undefined;
 }
 
 function SentenceBlockImpl({
@@ -95,10 +92,9 @@ function SentenceBlockImpl({
   showArcs,
   selectedWordId,
   lazy,
-  translation,
 }: SentenceBlockProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
-  // 弧线单独挂在句子正文的包裹层上：撑高时不会盖到下方的译文
+  // 弧线单独挂在句子正文的包裹层上
   const bodyRef = useRef<HTMLDivElement>(null);
   const seen = useSeen(ref, lazy);
   const hasParticle = useMemo(() => words.some((w) => w.particle), [words]);
@@ -121,16 +117,6 @@ function SentenceBlockImpl({
           <ParticleArcs containerRef={bodyRef} words={words} revision={`${furigana}:${words.length}`} />
         ) : null}
       </div>
-      {translation !== undefined ? (
-        translation === null ? (
-          <div className="sentence-tr is-loading" aria-hidden="true">
-            <span className="sk" />
-            <span className="sk" />
-          </div>
-        ) : (
-          <div className="sentence-tr">{translation || '—'}</div>
-        )
-      ) : null}
     </div>
   );
 }
@@ -156,7 +142,6 @@ export function ReadingView(): JSX.Element {
   const dispatch = useDispatch();
   const rootRef = useRef<HTMLDivElement>(null);
   const { byId, bySentence } = useWordIndex(analysis);
-  const tr = useTranslation();
 
   const selectedSentence = selectedWordId != null ? byId.get(selectedWordId)?.sentenceIndex ?? null : null;
 
@@ -227,8 +212,6 @@ export function ReadingView(): JSX.Element {
 
   const lazy = !!analysis && analysis.sentences.length > LAZY_THRESHOLD;
   const rev = analysis ? analysisId(analysis) : 0;
-  /** 译文开启且能真的请求时，未到货的句子显示占位骨架 */
-  const showTr = tr.enabled && tr.supported && !demo;
 
   if (!analysis) {
     return (
@@ -300,7 +283,6 @@ export function ReadingView(): JSX.Element {
               showArcs={settings.showArcs}
               selectedWordId={selectedSentence === s.index ? selectedWordId : null}
               lazy={lazy}
-              translation={showTr ? tr.lines[s.index] ?? null : undefined}
             />
           ))}
         </div>
@@ -352,8 +334,6 @@ function Toolbar(): JSX.Element {
           助词关系图
         </button>
 
-        <TranslationControls />
-
         <button
           className="tgl"
           type="button"
@@ -380,7 +360,6 @@ function Toolbar(): JSX.Element {
         ) : null}
       </div>
 
-      <TranslationNotice />
     </div>
   );
 }

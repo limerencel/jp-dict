@@ -12,30 +12,8 @@ export const DB_PATH = path.join(DATA_DIR, 'dictionaries.db');
 export const MEDIA_DIR = path.join(DATA_DIR, 'media');
 
 export const PORT = Number(process.env.PORT || 8787);
+export const HOST = process.env.JP_HOST || '127.0.0.1';
 export const MAX_TEXT_LENGTH = Number(process.env.JP_MAX_TEXT || 20000);
-
-export const AI = {
-  baseUrl: (process.env.AI_BASE_URL || 'https://api.deepseek.com/v1').replace(/\/+$/, ''),
-  apiKey: process.env.AI_API_KEY || '',
-  model: process.env.AI_MODEL || 'deepseek-chat',
-  get configured() {
-    return Boolean(process.env.AI_API_KEY);
-  },
-};
-
-export const TRANSLATE = {
-  /** deepl | microsoft | ai | google | libre | mymemory | auto */
-  provider: process.env.TRANSLATE_PROVIDER || 'auto',
-  target: process.env.TRANSLATE_TARGET || 'zh-CN',
-  deeplKey: process.env.DEEPL_API_KEY || '',
-  msKey: process.env.MS_TRANSLATOR_KEY || '',
-  msRegion: process.env.MS_TRANSLATOR_REGION || '',
-  msEndpoint: (process.env.MS_TRANSLATOR_ENDPOINT || 'https://api.cognitive.microsofttranslator.com').replace(/\/+$/, ''),
-  libreUrl: (process.env.LIBRETRANSLATE_URL || '').replace(/\/+$/, ''),
-  libreKey: process.env.LIBRETRANSLATE_API_KEY || '',
-  /** MyMemory 匿名额度较低，填邮箱可提额到每天 5 万字符 */
-  myMemoryEmail: process.env.MYMEMORY_EMAIL || '',
-};
 
 export function ensureDirs(): void {
   for (const dir of [DICT_DIR, DATA_DIR, MEDIA_DIR]) {

@@ -2,7 +2,7 @@
  * 全局状态：单个 reducer + 两个 context（值 / dispatch 分开，避免只用 dispatch 的
  * 组件跟着状态变化重渲染）。刻意不引第三方状态库。
  *
- * 注意：高频变化的状态（聊天流式文本、hover）**不放在这里**，
+ * 注意：高频变化的状态（hover）**不放在这里**，
  * 否则几千个词 chip 会跟着整树 reconcile。
  */
 import {
@@ -19,33 +19,18 @@ import type { AppConfig } from './api';
 
 export type FuriganaMode = 'all' | 'unknown' | 'off';
 export type Theme = 'dark' | 'light';
-export type RightTab = 'detail' | 'ai';
 
 export interface Settings {
   furigana: FuriganaMode;
   showArcs: boolean;
   /** 词性图例是否展开 */
   showLegend: boolean;
-  /** 是否在每句下方显示译文 */
-  showTranslation: boolean;
-  /** 目标语言，空串表示跟随服务端默认 */
-  translateTarget: string;
-  /** 翻译服务商，空串表示由服务端自动选择 */
-  translateProvider: string;
   theme: Theme;
   leftOpen: boolean;
   /** 右侧详情栏是否展开 */
   rightOpen: boolean;
   /** 右侧详情栏宽度（仅宽屏生效） */
   sidebarWidth: number;
-}
-
-/** 传给 AI 面板的一次性指令（key 用于区分重复的同一句提问） */
-export interface AiSeed {
-  key: number;
-  prompt: string;
-  wordId: number | null;
-  send: boolean;
 }
 
 export interface AppState {
@@ -59,8 +44,6 @@ export interface AppState {
   /** 当前结果来自内置演示数据 */
   demo: boolean;
   selectedWordId: number | null;
-  rightTab: RightTab;
-  aiSeed: AiSeed | null;
   dictManagerOpen: boolean;
   settings: Settings;
 }
@@ -75,9 +58,6 @@ export type Action =
   | { type: 'analyze/error'; message: string }
   | { type: 'analyze/clear' }
   | { type: 'word/select'; wordId: number | null }
-  | { type: 'tab/set'; tab: RightTab }
-  | { type: 'ai/seed'; prompt: string; wordId: number | null; send: boolean }
-  | { type: 'ai/seedConsumed' }
   | { type: 'dict/open'; open: boolean }
   | { type: 'settings/patch'; patch: Partial<Settings> };
 
@@ -89,9 +69,6 @@ const DEFAULT_SETTINGS: Settings = {
   furigana: 'all',
   showArcs: false,
   showLegend: false,
-  showTranslation: false,
-  translateTarget: '',
-  translateProvider: '',
   theme: 'dark',
   leftOpen: true,
   rightOpen: false,
@@ -138,13 +115,9 @@ export const initialState: AppState = {
   analyzeError: null,
   demo: false,
   selectedWordId: null,
-  rightTab: 'detail',
-  aiSeed: null,
   dictManagerOpen: false,
   settings: loadSettings(),
 };
-
-let seedSeq = 0;
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -166,9 +139,7 @@ export function reducer(state: AppState, action: Action): AppState {
         analysis: action.result,
         demo: action.demo,
         selectedWordId: null,
-        // 新结果没有选中词，详情栏留着就是一块空白；AI 会话则保持可见
-        settings:
-          state.rightTab === 'ai' ? state.settings : { ...state.settings, rightOpen: false },
+        settings: { ...state.settings, rightOpen: false },
       };
     case 'analyze/error':
       return { ...state, analyzing: false, analyzeError: action.message };
@@ -192,17 +163,6 @@ export function reducer(state: AppState, action: Action): AppState {
         settings: needOpen ? { ...state.settings, rightOpen: true } : state.settings,
       };
     }
-    case 'tab/set':
-      return { ...state, rightTab: action.tab };
-    case 'ai/seed':
-      return {
-        ...state,
-        rightTab: 'ai',
-        settings: { ...state.settings, rightOpen: true },
-        aiSeed: { key: ++seedSeq, prompt: action.prompt, wordId: action.wordId, send: action.send },
-      };
-    case 'ai/seedConsumed':
-      return { ...state, aiSeed: null };
     case 'dict/open':
       return { ...state, dictManagerOpen: action.open };
     case 'settings/patch': {

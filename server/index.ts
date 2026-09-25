@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import { AI, DICT_DIR, MAX_TEXT_LENGTH, PORT, ROOT, ensureDirs } from './config.ts';
+import { DICT_DIR, HOST, MAX_TEXT_LENGTH, PORT, ROOT, ensureDirs } from './config.ts';
 import { analyze, warmup } from './analyze/index.ts';
 import {
   closeDictionaries,
@@ -19,10 +19,8 @@ import {
   setDictionaryEnabled,
   setDictionaryPriority,
 } from './dict/index.ts';
-import { streamChat } from './ai/chat.ts';
-import { activeProviderId, defaultTarget, listProviders, listTargets, translate } from './translate/index.ts';
 import { isKanji } from '../shared/kana.ts';
-import type { ChatRequest, DictEntry, LookupResponse } from '../shared/types.ts';
+import type { DictEntry, LookupResponse } from '../shared/types.ts';
 
 const WEB_DIST = path.join(ROOT, 'dist', 'web');
 
@@ -161,46 +159,6 @@ function handleLookup(body: unknown): LookupResponse {
   };
 }
 
-async function handleChat(req: http.IncomingMessage, res: Res, body: unknown): Promise<void> {
-  const chatReq = (body ?? {}) as ChatRequest;
-  if (!Array.isArray(chatReq.messages) || chatReq.messages.length === 0) {
-    sendError(res, 400, '缺少 messages');
-    return;
-  }
-
-  res.writeHead(200, {
-    'content-type': 'text/event-stream; charset=utf-8',
-    'cache-control': 'no-cache, no-transform',
-    connection: 'keep-alive',
-    'x-accel-buffering': 'no',
-  });
-
-  const write = (obj: unknown) => {
-    if (!res.writableEnded) res.write(`data: ${JSON.stringify(obj)}\n\n`);
-  };
-
-  const controller = new AbortController();
-  req.on('close', () => controller.abort());
-
-  await new Promise<void>((resolve) => {
-    void streamChat(
-      chatReq,
-      {
-        onDelta: (text) => write({ type: 'delta', text }),
-        onError: (message) => write({ type: 'error', message }),
-        onDone: () => {
-          if (!res.writableEnded) {
-            res.write('data: [DONE]\n\n');
-            res.end();
-          }
-          resolve();
-        },
-      },
-      controller.signal,
-    );
-  });
-}
-
 /* ────────────────────────── 路由 ────────────────────────── */
 
 async function route(req: http.IncomingMessage, res: Res): Promise<void> {
@@ -226,17 +184,9 @@ async function route(req: http.IncomingMessage, res: Res): Promise<void> {
   /* ---- 配置 ---- */
   if (pathname === '/api/config' && method === 'GET') {
     return sendJson(res, 200, {
-      aiConfigured: AI.configured,
-      aiModel: AI.model,
       maxTextLength: MAX_TEXT_LENGTH,
       dictDir: DICT_DIR,
       dictReady: isReady(),
-      translate: {
-        providers: listProviders(),
-        active: activeProviderId(),
-        target: defaultTarget(),
-        targets: listTargets(),
-      },
     });
   }
 
@@ -303,42 +253,6 @@ async function route(req: http.IncomingMessage, res: Res): Promise<void> {
     return sendFile(res, file, true);
   }
 
-  /* ---- 翻译 ---- */
-  if (pathname === '/api/translate' && method === 'POST') {
-    const body = (await readJsonBody(req)) as {
-      texts?: unknown;
-      target?: unknown;
-      source?: unknown;
-      provider?: unknown;
-    };
-    const texts = Array.isArray(body.texts) ? body.texts.filter((t): t is string => typeof t === 'string') : [];
-    if (texts.length === 0) return sendError(res, 400, '缺少待翻译的文本');
-    if (texts.length > 200) return sendError(res, 400, '单次最多翻译 200 条，请分批提交');
-
-    const controller = new AbortController();
-    req.on('close', () => controller.abort());
-    try {
-      const result = await translate(
-        texts,
-        {
-          target: typeof body.target === 'string' ? body.target : undefined,
-          source: typeof body.source === 'string' ? body.source : undefined,
-          provider: typeof body.provider === 'string' ? body.provider : undefined,
-        },
-        controller.signal,
-      );
-      return sendJson(res, 200, result);
-    } catch (err) {
-      if (controller.signal.aborted) return;
-      return sendError(res, 502, '翻译失败', err instanceof Error ? err.message : String(err));
-    }
-  }
-
-  /* ---- AI ---- */
-  if (pathname === '/api/chat' && method === 'POST') {
-    return handleChat(req, res, await readJsonBody(req));
-  }
-
   sendError(res, 404, `未知接口 ${method} ${pathname}`);
 }
 
@@ -356,11 +270,11 @@ const server = http.createServer((req, res) => {
 async function main(): Promise<void> {
   ensureDirs();
 
-  server.listen(PORT, () => {
-    console.log(`\n  日语语法解析服务  http://localhost:${PORT}`);
+  server.listen(PORT, HOST, () => {
+    console.log(`\n  日语语法解析服务  http://${HOST}:${PORT}`);
     console.log(`  开发前端         http://localhost:5173`);
     console.log(`  词典目录         ${DICT_DIR}`);
-    console.log(`  AI               ${AI.configured ? `${AI.model} @ ${AI.baseUrl}` : '未配置（见 .env.example）'}\n`);
+    console.log('');
   });
 
   // 分词器与词典在后台加载，不阻塞端口监听

@@ -15,7 +15,6 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { useAppState, useDispatch } from '../state';
-import { useTranslation } from './Translation';
 import { IconSend } from './Icons';
 
 /** 展开态最多约 12 行后内部滚动 */
@@ -38,7 +37,6 @@ interface Props {
 export function Composer({ mode, onAnalyze }: Props): JSX.Element {
   const { text, analyzing, config } = useAppState();
   const dispatch = useDispatch();
-  const tr = useTranslation();
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const composing = useRef(false);
   const [open, setOpen] = useState(false);
@@ -149,24 +147,6 @@ export function Composer({ mode, onAnalyze }: Props): JSX.Element {
               >
                 清空
               </button>
-            ) : null}
-
-            {tr.supported ? (
-              <span className="selectwrap">
-                <select
-                  className="select"
-                  value={tr.target}
-                  aria-label="译文目标语言"
-                  title="译文目标语言"
-                  onChange={(e) => tr.setTarget(e.target.value)}
-                >
-                  {tr.targets.map((t) => (
-                    <option key={t.code} value={t.code}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </span>
             ) : null}
 
             <button

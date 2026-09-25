@@ -334,27 +334,6 @@ export interface LookupResponse {
   frequency: FrequencyInfo[];
 }
 
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface ChatRequest {
-  messages: ChatMessage[];
-  /** 当前分析的整段文本，作为背景 */
-  context?: {
-    fullText?: string;
-    sentence?: string;
-    focusWord?: {
-      surface: string;
-      reading: string;
-      lemma: string;
-      posLabel: string;
-      brief: string[];
-    };
-  };
-}
-
 export interface ImportProgress {
   phase: 'scan' | 'read' | 'parse' | 'write' | 'index' | 'done' | 'error';
   file: string;
@@ -366,44 +345,4 @@ export interface ImportProgress {
 export interface ApiError {
   error: string;
   detail?: string;
-}
-
-/* ────────────────────────────── 翻译 ────────────────────────────── */
-
-export interface TranslateRequest {
-  /** 一次可提交多条（通常按句拆分），顺序与返回一一对应 */
-  texts: string[];
-  /** 目标语言，默认取服务端配置（zh-CN） */
-  target?: string;
-  /** 源语言，默认 ja */
-  source?: string;
-  /** 指定服务商，默认由服务端自动选择 */
-  provider?: string;
-}
-
-export interface TranslateResponse {
-  provider: string;
-  providerLabel: string;
-  target: string;
-  translations: string[];
-  cached: boolean[];
-  /** 主服务商失败并自动降级时的说明 */
-  notice?: string;
-}
-
-export interface TranslateProviderInfo {
-  id: string;
-  label: string;
-  available: boolean;
-  needsKey: boolean;
-  hint: string;
-}
-
-export interface TranslateConfig {
-  providers: TranslateProviderInfo[];
-  /** 当前生效的服务商 id */
-  active: string;
-  /** 默认目标语言 */
-  target: string;
-  targets: { code: string; label: string }[];
 }

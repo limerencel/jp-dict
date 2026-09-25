@@ -6,7 +6,7 @@
  *   2. structured-content            → StructuredContent（明鏡・大辞林等）
  *   3. 其余纯文本                    → pre-wrap 段落（安全网，至少换行是对的）
  */
-import { Fragment, useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { Fragment, useCallback, useEffect, useId, useMemo, useState, type MouseEvent } from 'react';
 import type { DictEntry, GlossaryNode, TagInfo } from '@shared/types';
 import { glossaryNodeToText, glossaryToLines } from '@shared/glossary';
 import { mediaUrl } from '../api';
@@ -23,7 +23,7 @@ import {
 } from '../lib/glossFormat';
 import { ErrorBoundary } from './ErrorBoundary';
 import { StructuredContent } from './StructuredContent';
-import { IconCheck, IconCopy, IconSparkle } from './Icons';
+import { IconCheck, IconCopy } from './Icons';
 
 /** 每个义项默认展示的主例组数 */
 const EXAMPLES_PER_SENSE = 3;
@@ -573,10 +573,9 @@ function buildParts(glossary: GlossaryNode[]): BuiltEntry {
 interface EntryProps {
   entry: DictEntry;
   onInternalLookup: (query: string) => void;
-  onAskAi: (entry: DictEntry) => void;
 }
 
-function EntryView({ entry, onInternalLookup, onAskAi }: EntryProps): JSX.Element {
+function EntryView({ entry, onInternalLookup }: EntryProps): JSX.Element {
   const [expandAll, setExpandAll] = useState(false);
   const { parts, examples, copyText, head } = useMemo(() => buildParts(entry.glossary), [entry.glossary]);
 
@@ -619,9 +618,6 @@ function EntryView({ entry, onInternalLookup, onAskAi }: EntryProps): JSX.Elemen
             </button>
           ) : null}
           <CopyButton text={copyText || entry.term} />
-          <button className="btn ghost sm" type="button" title="就这条释义问 AI" onClick={() => onAskAi(entry)}>
-            <IconSparkle />
-          </button>
         </span>
       </div>
 
@@ -663,36 +659,55 @@ function EntryView({ entry, onInternalLookup, onAskAi }: EntryProps): JSX.Elemen
 /* ══════════════════════ 词典分组 ══════════════════════ */
 
 interface GroupProps {
+  id: number;
   title: string;
   items: DictEntry[];
+  expanded: boolean;
+  onToggle: (id: number) => void;
   onInternalLookup: (query: string) => void;
-  onAskAi: (entry: DictEntry) => void;
 }
 
-function DictGroup({ title, items, onInternalLookup, onAskAi }: GroupProps): JSX.Element {
+function DictGroup({ id, title, items, expanded, onToggle, onInternalLookup }: GroupProps): JSX.Element {
   const [all, setAll] = useState(false);
+  const contentId = useId();
   const visible = all ? items : items.slice(0, ENTRIES_PER_DICT);
   const hidden = items.length - visible.length;
 
   return (
     <section className="dictgroup">
       <div className="dt">
+        <button
+          className="dt-toggle"
+          type="button"
+          aria-label={`${expanded ? '收起' : '展开'}「${title}」`}
+          aria-expanded={expanded}
+          aria-controls={contentId}
+          onClick={() => onToggle(id)}
+        >
+          <span className="dt-chevron" aria-hidden="true" />
+        </button>
         <span className="dt-title">{title}</span>
         <span className="dt-count">{items.length} 条</span>
       </div>
-      {visible.map((e, i) => (
-        <EntryView key={`${e.sequence}-${i}`} entry={e} onInternalLookup={onInternalLookup} onAskAi={onAskAi} />
-      ))}
-      {hidden > 0 ? (
-        <button className="gx-more block" type="button" onClick={() => setAll(true)}>
-          显示其余 {hidden} 条词条
-        </button>
-      ) : null}
-      {all && items.length > ENTRIES_PER_DICT ? (
-        <button className="gx-more block" type="button" onClick={() => setAll(false)}>
-          只看前 {ENTRIES_PER_DICT} 条
-        </button>
-      ) : null}
+      <div id={contentId} hidden={!expanded}>
+        {expanded ? (
+          <>
+            {visible.map((e, i) => (
+              <EntryView key={`${e.sequence}-${i}`} entry={e} onInternalLookup={onInternalLookup} />
+            ))}
+            {hidden > 0 ? (
+              <button className="gx-more block" type="button" onClick={() => setAll(true)}>
+                显示其余 {hidden} 条词条
+              </button>
+            ) : null}
+            {all && items.length > ENTRIES_PER_DICT ? (
+              <button className="gx-more block" type="button" onClick={() => setAll(false)}>
+                只看前 {ENTRIES_PER_DICT} 条
+              </button>
+            ) : null}
+          </>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -700,27 +715,43 @@ function DictGroup({ title, items, onInternalLookup, onAskAi }: GroupProps): JSX
 interface Props {
   entries: DictEntry[];
   onInternalLookup: (query: string) => void;
-  onAskAi: (entry: DictEntry) => void;
 }
 
-export function GlossaryView({ entries, onInternalLookup, onAskAi }: Props): JSX.Element {
-  // 保持服务端给出的顺序（已按词典优先级排好），仅做相邻分组
-  const groups: { title: string; items: DictEntry[] }[] = [];
+export function GlossaryView({ entries, onInternalLookup }: Props): JSX.Element {
+  // 按词典 ID 归组，保留每本词典首次出现的顺序和词条原有顺序
+  const groups: { id: number; title: string; items: DictEntry[] }[] = [];
+  const byId = new Map<number, (typeof groups)[number]>();
   for (const e of entries) {
-    const last = groups[groups.length - 1];
-    if (last && last.title === e.dictTitle) last.items.push(e);
-    else groups.push({ title: e.dictTitle, items: [e] });
+    let group = byId.get(e.dictId);
+    if (!group) {
+      group = { id: e.dictId, title: e.dictTitle, items: [] };
+      byId.set(e.dictId, group);
+      groups.push(group);
+    }
+    group.items.push(e);
   }
+  const [closed, setClosed] = useState<Set<number>>(() => new Set());
+
+  const toggle = (id: number): void => {
+    setClosed((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div className="glossary">
-      {groups.map((g, gi) => (
+      {groups.map((g) => (
         <DictGroup
-          key={`${g.title}-${gi}`}
+          key={g.id}
+          id={g.id}
           title={g.title}
           items={g.items}
+          expanded={!closed.has(g.id)}
+          onToggle={toggle}
           onInternalLookup={onInternalLookup}
-          onAskAi={onAskAi}
         />
       ))}
     </div>

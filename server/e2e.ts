@@ -1,5 +1,5 @@
 /**
- * 端到端冒烟测试：拉起真实 HTTP 服务，依次打通 config / analyze / lookup / dictionaries / chat。
+ * 端到端冒烟测试：拉起真实 HTTP 服务，依次打通 config / analyze / lookup / dictionaries。
  * 运行：npx tsx server/e2e.ts
  */
 import { spawn } from 'node:child_process';
@@ -33,7 +33,7 @@ async function main(): Promise<void> {
   // Node 只删类型、不生成代码，enum / namespace / 构造函数参数属性都会在这里炸出来。
   const child = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', path.join(ROOT, 'server', 'index.ts')], {
     cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT), JP_DATA_DIR: tmp, AI_API_KEY: '' },
+    env: { ...process.env, PORT: String(PORT), JP_DATA_DIR: tmp },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let serverLog = '';
@@ -76,7 +76,7 @@ async function main(): Promise<void> {
     const config = (await (await fetch(`${BASE}/api/config`)).json()) as Record<string, unknown>;
     check('返回 maxTextLength', typeof config.maxTextLength === 'number' && config.maxTextLength > 0);
     check('返回 dictDir', typeof config.dictDir === 'string');
-    check('AI 未配置时 aiConfigured=false', config.aiConfigured === false);
+    check('配置仅含本地分析字段', !('aiConfigured' in config) && !('translate' in config));
 
     console.log('\n[2] POST /api/analyze');
     const text = '先生に本を読ませられなかった。彼が作ってくれたお弁当はとてもおいしかったです。';
@@ -170,20 +170,10 @@ async function main(): Promise<void> {
     check('删除不存在的词典返回 404', (await fetch(`${BASE}/api/dictionaries/9999`, { method: 'DELETE' })).status === 404);
     check('未知媒体返回 404', (await fetch(`${BASE}/api/media/1/nope.png`)).status === 404);
 
-    console.log('\n[6] POST /api/chat（未配置 AI 时应走 SSE 报错而非 500）');
-    const chat = await fetch(`${BASE}/api/chat`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: '这句什么意思？' }] }),
-    });
-    check('HTTP 200', chat.status === 200, chat.status);
-    check('Content-Type 为 SSE', (chat.headers.get('content-type') || '').includes('text/event-stream'));
-    const sse = await chat.text();
-    check('返回 error 事件', sse.includes('"type":"error"'), sse.slice(0, 200));
-    check('以 [DONE] 结束', sse.trimEnd().endsWith('data: [DONE]'));
-
-    console.log('\n[7] 错误处理');
+    console.log('\n[6] 错误处理');
     check('空文本返回 400', (await fetch(`${BASE}/api/analyze`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"text":"  "}' })).status === 400);
+    check('聊天接口已移除', (await fetch(`${BASE}/api/chat`, { method: 'POST' })).status === 404);
+    check('翻译接口已移除', (await fetch(`${BASE}/api/translate`, { method: 'POST' })).status === 404);
     check('未知接口返回 404', (await fetch(`${BASE}/api/nope`)).status === 404);
   } finally {
     await stop();
@@ -215,7 +205,7 @@ async function realDictionaryChecks(): Promise<void> {
   const port = PORT + 1;
   const child = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', path.join(ROOT, 'server', 'index.ts')], {
     cwd: ROOT,
-    env: { ...process.env, PORT: String(port), AI_API_KEY: '' },
+    env: { ...process.env, PORT: String(port) },
     stdio: 'ignore',
   });
 

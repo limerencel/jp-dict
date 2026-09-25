@@ -17,10 +17,8 @@ import { useAppState, useDispatch } from './state';
 import { Composer, COMPOSER_EXAMPLES } from './components/Composer';
 import { ReadingView } from './components/ReadingView';
 import { DetailPanel } from './components/DetailPanel';
-import { ChatPanel } from './components/ChatPanel';
 import { DictionaryManager } from './components/DictionaryManager';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { TranslationProvider, SentenceTranslateCard } from './components/Translation';
 import { IconBook, IconClose, IconMoon, IconPanelRight, IconSun } from './components/Icons';
 
 export function App(): JSX.Element {
@@ -135,51 +133,49 @@ export function App(): JSX.Element {
         ) : null}
       </header>
 
-      <TranslationProvider>
-        <div className="workspace">
-          <main className="stage">
-            {configError || (configLoaded && config && !config.dictReady) ? (
-              <div className="topbanners">
-                {configError ? (
-                  <div className="banner error">
-                    <span>✕</span>
-                    <span>
-                      无法读取服务端配置：{configError}
-                      {import.meta.env.DEV ? '　（后端未启动时，可用下方的「演示数据」预览界面）' : ''}
-                    </span>
-                  </div>
-                ) : null}
-                {configLoaded && config && !config.dictReady ? (
-                  <div className="banner warn">
-                    <span>⚠</span>
-                    <span>
-                      当前没有可用词典，仅语法分析可用（无释义 / 声调 / 频率）。把 Yomitan 词典 zip 放进{' '}
-                      <code>{config.dictDir}</code> 后在「词典」里重新扫描。
-                    </span>
-                    <span className="spacer" />
-                    <button className="btn sm" type="button" onClick={() => dispatch({ type: 'dict/open', open: true })}>
-                      去导入
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
+      <div className="workspace">
+        <main className="stage">
+          {configError || (configLoaded && config && !config.dictReady) ? (
+            <div className="topbanners">
+              {configError ? (
+                <div className="banner error">
+                  <span>✕</span>
+                  <span>
+                    无法读取服务端配置：{configError}
+                    {import.meta.env.DEV ? '　（后端未启动时，可用下方的「演示数据」预览界面）' : ''}
+                  </span>
+                </div>
+              ) : null}
+              {configLoaded && config && !config.dictReady ? (
+                <div className="banner warn">
+                  <span>⚠</span>
+                  <span>
+                    当前没有可用词典，仅语法分析可用（无释义 / 声调 / 频率）。把 Yomitan 词典 zip 放进{' '}
+                    <code>{config.dictDir}</code> 后在「词典」里重新扫描。
+                  </span>
+                  <span className="spacer" />
+                  <button className="btn sm" type="button" onClick={() => dispatch({ type: 'dict/open', open: true })}>
+                    去导入
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
-            {hasResult ? (
-              <>
-                <Composer mode="bar" onAnalyze={analyze} />
-                <ErrorBoundary resetKey={analysis} fallback={(e) => <PaneError what="解析结果" error={e} />}>
-                  <ReadingView />
-                </ErrorBoundary>
-              </>
-            ) : (
-              <Hero onAnalyze={analyze} onDemo={loadDemo} />
-            )}
-          </main>
+          {hasResult ? (
+            <>
+              <Composer mode="bar" onAnalyze={analyze} />
+              <ErrorBoundary resetKey={analysis} fallback={(e) => <PaneError what="解析结果" error={e} />}>
+                <ReadingView />
+              </ErrorBoundary>
+            </>
+          ) : (
+            <Hero onAnalyze={analyze} onDemo={loadDemo} />
+          )}
+        </main>
 
-          {sidebarOpen ? <Sidebar /> : null}
-        </div>
-      </TranslationProvider>
+        {sidebarOpen ? <Sidebar /> : null}
+      </div>
 
       {sidebarOpen ? (
         <button
@@ -206,7 +202,7 @@ function Hero({ onAnalyze, onDemo }: { onAnalyze: (text: string) => void; onDemo
       <div className="hero-title">
         <h1>日本語文法解析</h1>
         <div className="rule" />
-        <p>词典 · 活用 · 助词 · 译文</p>
+        <p>词典 · 活用 · 助词</p>
       </div>
 
       <Composer mode="hero" onAnalyze={onAnalyze} />
@@ -268,7 +264,7 @@ function Sidebar(): JSX.Element {
   };
 
   return (
-    <aside className="sidebar" aria-label="详情与 AI">
+    <aside className="sidebar" aria-label="词条详情">
       <div
         className={dragging ? 'sidebar-resize is-dragging' : 'sidebar-resize'}
         role="separator"
@@ -277,23 +273,8 @@ function Sidebar(): JSX.Element {
         onPointerDown={startDrag}
       />
 
-      <div className="tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={state.rightTab === 'detail'}
-          onClick={() => dispatch({ type: 'tab/set', tab: 'detail' })}
-        >
-          详情
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={state.rightTab === 'ai'}
-          onClick={() => dispatch({ type: 'tab/set', tab: 'ai' })}
-        >
-          AI 问答
-        </button>
+      <div className="sidebar-head">
+        <span>词条详情</span>
         <span className="spacer" />
         <button
           className="btn icon ghost close"
@@ -306,16 +287,9 @@ function Sidebar(): JSX.Element {
         </button>
       </div>
 
-      {/* 两个面板都保持挂载：切换标签不丢聊天记录与滚动位置 */}
-      <div className="tabpane" role="tabpanel" hidden={state.rightTab !== 'detail'}>
-        <SentenceTranslateCard />
+      <div className="sidebar-pane">
         <ErrorBoundary resetKey={state.selectedWordId} fallback={(e) => <PaneError what="词条详情" error={e} />}>
           <DetailPanel />
-        </ErrorBoundary>
-      </div>
-      <div className="tabpane" role="tabpanel" hidden={state.rightTab !== 'ai'}>
-        <ErrorBoundary fallback={(e) => <PaneError what="AI 面板" error={e} />}>
-          <ChatPanel />
         </ErrorBoundary>
       </div>
     </aside>
