@@ -7,6 +7,7 @@ import type {
   LookupRequest,
   LookupResponse,
 } from '@shared/types';
+import type { PronunciationRequest } from './lib/pronunciation';
 
 export interface AppConfig {
   maxTextLength: number;
@@ -104,6 +105,34 @@ export function analyze(text: string, signal?: AbortSignal): Promise<AnalysisRes
 
 export function lookup(req: LookupRequest, signal?: AbortSignal): Promise<LookupResponse> {
   return postJson<LookupResponse>('/api/lookup', req, signal);
+}
+
+/** MP3 only; voice selection and credentials stay on the server. */
+export async function pronunciation(
+  req: PronunciationRequest,
+  signal?: AbortSignal,
+  fetcher: typeof fetch = fetch,
+): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetcher('/api/pronunciation', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+      body: JSON.stringify(req),
+      signal,
+    });
+  } catch (err) {
+    if (signal?.aborted || (err instanceof Error && err.name === 'AbortError')) throw err;
+    throw new ApiError('无法连接到发音服务，请重试', 0);
+  }
+  if (!res.ok) throw await readError(res);
+  if (res.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'audio/mpeg') {
+    throw new ApiError('发音服务返回了无效音频，请重试', res.status);
+  }
+  const blob = await res.blob();
+  if (!blob.size) throw new ApiError('发音服务返回了空音频，请重试', res.status);
+  return blob;
 }
 
 export function listDictionaries(signal?: AbortSignal): Promise<DictionaryListResponse> {

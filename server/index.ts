@@ -21,6 +21,7 @@ import {
 } from './dict/index.ts';
 import { isKanji } from '../shared/kana.ts';
 import type { DictEntry, LookupResponse } from '../shared/types.ts';
+import { closePronunciation, handlePronunciation } from './tts/index.ts';
 
 const WEB_DIST = path.join(ROOT, 'dist', 'web');
 
@@ -203,6 +204,11 @@ async function route(req: http.IncomingMessage, res: Res): Promise<void> {
     return sendJson(res, 200, handleLookup(await readJsonBody(req)));
   }
 
+  /* ---- 发音 ---- */
+  if (pathname === '/api/pronunciation') {
+    return void (await handlePronunciation(req, res));
+  }
+
   /* ---- 词典管理 ---- */
   if (pathname === '/api/dictionaries' && method === 'GET') {
     return sendJson(res, 200, { dictionaries: listDictionaries(), ready: isReady(), dictDir: DICT_DIR });
@@ -292,6 +298,8 @@ async function main(): Promise<void> {
       console.log(`  [词典] 尚未导入任何词典。把 Yomitan zip 或 MDict mdx 放入 ${DICT_DIR} 后重启，或在界面里点「重新扫描」。`);
     } else {
       console.log(`  [词典] 已就绪 ${dicts.length} 部：${dicts.map((d) => d.title).join('、')}`);
+      await analyze('日本語の文法を解析するテスト。');
+      console.log('  [预热] 语法与词典索引预热完成');
     }
   } catch (err) {
     console.error('  [词典] 初始化失败:', err);
@@ -302,6 +310,11 @@ function shutdown(): void {
   server.close();
   try {
     closeDictionaries();
+  } catch {
+    /* 忽略关闭期异常 */
+  }
+  try {
+    closePronunciation();
   } catch {
     /* 忽略关闭期异常 */
   }

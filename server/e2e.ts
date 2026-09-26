@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import type { AnalysisResult, LookupResponse } from '../shared/types.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PORT = 8791;
+const PORT = Number(process.env.E2E_PORT || 8795);
 const BASE = `http://127.0.0.1:${PORT}`;
 
 let passed = 0;
@@ -175,6 +175,16 @@ async function main(): Promise<void> {
     check('聊天接口已移除', (await fetch(`${BASE}/api/chat`, { method: 'POST' })).status === 404);
     check('翻译接口已移除', (await fetch(`${BASE}/api/translate`, { method: 'POST' })).status === 404);
     check('未知接口返回 404', (await fetch(`${BASE}/api/nope`)).status === 404);
+
+    console.log('\n[7] 发音接口');
+    const ttsGet = await fetch(`${BASE}/api/pronunciation`);
+    check('发音 GET 返回 405', ttsGet.status === 405);
+    const ttsBad = await fetch(`${BASE}/api/pronunciation`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ surface: '生', reading: 'bad-reading-xyz' }),
+    });
+    check('发音非法读音返回 400', ttsBad.status === 400);
   } finally {
     await stop();
   }

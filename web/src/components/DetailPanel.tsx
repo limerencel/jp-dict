@@ -14,6 +14,8 @@ import { useAppState, useDispatch, useWordIndex } from '../state';
 import { GlossaryView } from './GlossaryView';
 import { KanjiView } from './KanjiView';
 import { PitchCurve } from './PitchCurve';
+import { PronunciationButton } from './PronunciationButton';
+import { pronunciationTarget } from '../lib/pronunciation';
 import { IconChevronLeft, IconChevronRight, IconClose } from './Icons';
 
 type Target = { kind: 'word'; wordId: number } | { kind: 'query'; text: string };
@@ -180,7 +182,15 @@ export function DetailPanel(): JSX.Element {
 
         {current?.kind === 'query' ? (
           <div className="wordhead">
-            <div className="surface jp">{current.text}</div>
+            <div className="surface jp">
+              {current.text}
+              <PronunciationButton
+                id={`query-${current.text}`}
+                target={pronunciationTarget({ surface: current.text })}
+                size="md"
+                showBadge
+              />
+            </div>
             <div className="sub">
               <span className="faint">来自词典内部链接</span>
             </div>
@@ -205,6 +215,14 @@ function WordSections({ word, byId }: WordSectionsProps): JSX.Element {
   const romaji = word.particle?.romaji ?? toRomaji(word.reading || word.surface);
   const inflection = word.inflection;
   const particle = word.particle;
+  const mainTarget = useMemo(() => pronunciationTarget(word), [word]);
+  const lemmaTarget = useMemo(
+    () =>
+      word.lemma
+        ? pronunciationTarget({ surface: word.lemma, reading: word.lemmaReading || undefined })
+        : null,
+    [word.lemma, word.lemmaReading],
+  );
 
   return (
     <>
@@ -224,15 +242,27 @@ function WordSections({ word, byId }: WordSectionsProps): JSX.Element {
                 ),
               )
             : word.surface}
+          <PronunciationButton
+            id={`word-${word.id}`}
+            target={mainTarget}
+            size="md"
+            showBadge
+          />
         </div>
         <div className="sub">
           <span className="poslabel">{word.posLabel}</span>
           {word.reading ? <span className="jp">{word.reading}</span> : null}
           {romaji ? <span className="romaji-full">{romaji}</span> : null}
           {word.lemma && word.lemma !== word.surface ? (
-            <span>
+            <span className="lemma-pronounce-wrap">
               <span className="faint">辞書形 </span>
               <span className="jp">{word.lemma}</span>
+              <PronunciationButton
+                id={`word-${word.id}-lemma`}
+                target={lemmaTarget}
+                size="sm"
+                title={`朗读辞書形「${word.lemma}」`}
+              />
             </span>
           ) : null}
           {word.unknown ? <span className="chiptag">未收录</span> : null}

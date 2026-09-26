@@ -14,7 +14,8 @@
     "start": "node --no-warnings=ExperimentalWarning --env-file-if-exists=.env server/index.ts",
     "dict:import": "tsx --no-warnings=ExperimentalWarning --env-file-if-exists=.env server/dict/cli.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "test": "npm run typecheck && npm run test:dict && npm run test:analyze && npm run test:gloss && npm run test:e2e",
+    "test": "npm run typecheck && npm run test:dict && npm run test:analyze && npm run test:gloss && npm run test:tts && npm run test:e2e",
+    "test:tts": "tsx --test server/tts/*.test.ts web/src/lib/pronunciation*.test.ts",
     "test:gloss": "tsx web/src/lib/glossFormat.test.ts",
     "test:dict": "tsx --no-warnings=ExperimentalWarning server/dict/selftest.ts",
     "test:analyze": "tsx --no-warnings=ExperimentalWarning server/analyze/selftest.ts",
@@ -25,6 +26,7 @@
     "@fontsource-variable/noto-serif-sc": "^5.3.0",
     "@sglkc/kuromoji": "^1.1.0",
     "fflate": "^0.8.3",
+    "google-auth-library": "^11.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "wanakana": "^5.3.1"

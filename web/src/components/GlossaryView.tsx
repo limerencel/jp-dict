@@ -24,6 +24,8 @@ import {
 import { ErrorBoundary } from './ErrorBoundary';
 import { StructuredContent } from './StructuredContent';
 import { IconCheck, IconCopy } from './Icons';
+import { PronunciationButton } from './PronunciationButton';
+import { pronunciationTarget } from '../lib/pronunciation';
 
 /** 每个义项默认展示的主例组数 */
 const EXAMPLES_PER_SENSE = 3;
@@ -581,6 +583,10 @@ function EntryView({ entry, onInternalLookup }: EntryProps): JSX.Element {
 
   // 部分词条的 reading 字段为空，用释义词头行里的假名补上，避免为了一个读音多排一行
   const reading = entry.reading || (head?.kanji ? head.kana : '') || '';
+  const entryTarget = useMemo(
+    () => pronunciationTarget({ surface: entry.term, reading: reading || undefined }),
+    [entry.term, reading],
+  );
 
   // 多条纯字符串释义（JMdict 风格）仍然用有序列表
   const simpleList =
@@ -606,6 +612,11 @@ function EntryView({ entry, onInternalLookup }: EntryProps): JSX.Element {
         {entry.definitionTags.map((t, i) => (
           <Tag key={`dt${i}`} tag={t} />
         ))}
+        <PronunciationButton
+          id={`entry-${entry.dictId}-${entry.sequence}-${entry.term}`}
+          target={entryTarget}
+          size="sm"
+        />
         <span className="entry-actions">
           {examples > EXPAND_ALL_THRESHOLD ? (
             <button

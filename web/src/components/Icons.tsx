@@ -118,3 +118,17 @@ export const IconSend = (p: P): JSX.Element => (
     <path d="M14 2 7.2 8.8M14 2l-4.4 12-2.4-5.2L2 6.4z" />
   </Svg>
 );
+
+export const IconVolume = (p: P): JSX.Element => (
+  <Svg {...p}>
+    <polygon points="7 3 3.5 6 1.5 6 1.5 10 3.5 10 7 13 7 3" fill="currentColor" stroke="none" />
+    <path d="M10 5.5a4 4 0 0 1 0 5M12 3a7.5 7.5 0 0 1 0 10" />
+  </Svg>
+);
+
+export const IconVolumePlaying = (p: P): JSX.Element => (
+  <Svg {...p}>
+    <polygon points="7 3 3.5 6 1.5 6 1.5 10 3.5 10 7 13 7 3" fill="currentColor" stroke="none" />
+    <path d="M10 5a4.5 4.5 0 0 1 0 6M12.5 2.5a8 8 0 0 1 0 11" strokeWidth="2" />
+  </Svg>
+);

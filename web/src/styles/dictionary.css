@@ -1562,3 +1562,105 @@
     transition: none;
   }
 }
+
+/* ═══════════════════════════ 12. 发音按钮 ═══════════════════════════ */
+
+.pronounce-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.btn-pronounce {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s, 4px);
+  color: var(--fg-muted, #7c7267);
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.btn-pronounce::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.btn-pronounce:hover:not(:disabled) {
+  color: var(--accent, #9e3d22);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.btn-pronounce:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-pronounce-md {
+  font-size: 14px;
+  height: 24px;
+  min-width: 24px;
+}
+
+.btn-pronounce-sm {
+  font-size: 12px;
+  height: 20px;
+  min-width: 20px;
+  padding: 1px 3px;
+}
+
+.btn-pronounce.playing {
+  color: var(--accent, #9e3d22);
+  background: rgba(158, 61, 34, 0.08);
+  border-color: rgba(158, 61, 34, 0.2);
+}
+
+.btn-pronounce.error {
+  color: #c93b2b;
+}
+
+.pronounce-spin {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: pronounce-rotate 0.8s linear infinite;
+}
+
+@keyframes pronounce-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pronounce-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  color: var(--fg-faint, #a89f91);
+  background: rgba(0, 0, 0, 0.03);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--line, #e2dacd);
+  user-select: none;
+}
+
+.lemma-pronounce-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
