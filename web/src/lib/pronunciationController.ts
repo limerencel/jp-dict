@@ -38,10 +38,11 @@ export class PronunciationController {
   private createObjectURLFn: (blob: Blob) => string;
   private revokeObjectURLFn: (url: string) => void;
 
-  private currentId: string | null = null;
-  private currentTarget: PronunciationRequest | null = null;
-  private currentStatus: PronunciationStatus = 'idle';
-  private currentError?: string;
+  private snapshot: PronunciationSnapshot = {
+    id: null,
+    target: null,
+    status: 'idle',
+  };
 
   private activeAbortCtrl: AbortController | null = null;
   private audio: PronunciationAudio | null = null;
@@ -59,12 +60,12 @@ export class PronunciationController {
   }
 
   public getSnapshot(): PronunciationSnapshot {
-    return {
-      id: this.currentId,
-      target: this.currentTarget,
-      status: this.currentStatus,
-      error: this.currentError,
-    };
+    return this.snapshot;
+  }
+
+  private setSnapshot(next: PronunciationSnapshot): void {
+    this.snapshot = next;
+    this.notify();
   }
 
   public subscribe(listener: () => void): () => void {
@@ -89,24 +90,20 @@ export class PronunciationController {
   }
 
   private handleAudioEnded = () => {
-    if (this.currentStatus === 'playing') {
-      this.currentStatus = 'ready';
-      this.notify();
+    if (this.snapshot.status === 'playing') {
+      this.setSnapshot({ ...this.snapshot, status: 'ready' });
     }
   };
 
   private handleAudioError = () => {
-    if (this.currentStatus === 'playing' || this.currentStatus === 'loading') {
-      this.currentStatus = 'error';
-      this.currentError = '音频播放失败，请重试';
-      this.notify();
+    if (this.snapshot.status === 'playing' || this.snapshot.status === 'loading') {
+      this.setSnapshot({ ...this.snapshot, status: 'error', error: '音频播放失败，请重试' });
     }
   };
 
   private handleAudioPause = () => {
-    if (this.currentStatus === 'playing') {
-      this.currentStatus = 'ready';
-      this.notify();
+    if (this.snapshot.status === 'playing') {
+      this.setSnapshot({ ...this.snapshot, status: 'ready' });
     }
   };
 
@@ -118,18 +115,17 @@ export class PronunciationController {
     if (this.audio) {
       this.audio.pause();
     }
-    if (this.currentStatus === 'loading' || this.currentStatus === 'playing') {
-      this.currentStatus = this.currentBlob ? 'ready' : 'idle';
-      this.notify();
+    if (this.snapshot.status === 'loading' || this.snapshot.status === 'playing') {
+      this.setSnapshot({ ...this.snapshot, status: this.currentBlob ? 'ready' : 'idle' });
     }
   }
 
   public async activate(id: string, target: PronunciationRequest): Promise<void> {
     const key = targetKey(target);
-    const sameTarget = this.currentId === id && targetKey(this.currentTarget) === key;
+    const sameTarget = this.snapshot.id === id && targetKey(this.snapshot.target) === key;
 
     // 1. 如果正在播放相同目标，点击则暂停/重置
-    if (sameTarget && this.currentStatus === 'playing') {
+    if (sameTarget && this.snapshot.status === 'playing') {
       this.stop();
       return;
     }
@@ -143,16 +139,11 @@ export class PronunciationController {
       this.audio.pause();
     }
 
-    this.currentId = id;
-    this.currentTarget = target;
-    this.currentError = undefined;
-
     // 3. 检查是否有已有 Blob 缓存（内存中保留）
     let blob = this.cachedBlobs.get(key) ?? null;
 
     if (!blob) {
-      this.currentStatus = 'loading';
-      this.notify();
+      this.setSnapshot({ id, target, status: 'loading', error: undefined });
 
       const ctrl = new AbortController();
       this.activeAbortCtrl = ctrl;
@@ -162,9 +153,12 @@ export class PronunciationController {
         this.cachedBlobs.set(key, blob);
       } catch (err) {
         if (ctrl.signal.aborted) return;
-        this.currentStatus = 'error';
-        this.currentError = err instanceof Error ? err.message : '获取发音失败';
-        this.notify();
+        this.setSnapshot({
+          id,
+          target,
+          status: 'error',
+          error: err instanceof Error ? err.message : '获取发音失败',
+        });
         return;
       } finally {
         if (this.activeAbortCtrl === ctrl) {
@@ -187,19 +181,24 @@ export class PronunciationController {
     audio.currentTime = 0;
 
     try {
-      this.currentStatus = 'playing';
-      this.notify();
+      this.setSnapshot({ id, target, status: 'playing', error: undefined });
       await audio.play();
     } catch (err: any) {
       // 在 Safari 等由于非同步手势限制导致自动 play 失败时，进入 ready 状态提示再次点击播放
       if (err?.name === 'NotAllowedError') {
-        this.currentStatus = 'ready';
-        this.currentError = '音频已就绪，请再次点击播放';
-        this.notify();
+        this.setSnapshot({
+          id,
+          target,
+          status: 'ready',
+          error: '音频已就绪，请再次点击播放',
+        });
       } else {
-        this.currentStatus = 'error';
-        this.currentError = '播放被中断或不支持';
-        this.notify();
+        this.setSnapshot({
+          id,
+          target,
+          status: 'error',
+          error: '播放被中断或不支持',
+        });
       }
     }
   }
